@@ -1,4 +1,4 @@
-package self.adragon.model
+package core.model
 
 enum class FileType(val type: Int) {
     None(0),

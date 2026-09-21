@@ -1,4 +1,4 @@
-package model
+package core.model.player
 
 import kotlinx.serialization.Serializable
 

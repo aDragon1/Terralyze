@@ -1,16 +1,28 @@
+package core.parser
+
+import Buff
+import core.model.Color
+import core.model.equipment.Equipment
+import core.model.equipment.EquipmentSlot
+import core.model.equipment.MiscEquipmentSlot
+import core.model.player.PlayerColors
+import core.model.player.PlayerMetadata
+import core.model.player.SP
+import core.model.player.ShimmerUpgrades
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObjectBuilder
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.encodeToJsonElement
-import model.*
 import self.adragon.BinaryReader
-import self.adragon.model.FileType
+import core.model.FileType
+import core.model.item.BankItem
+import core.model.item.EquipmentItem
+import core.model.item.InventoryItem
+import core.model.item.Item
 import java.io.File
-import java.time.LocalDateTime
 import kotlin.time.Duration
 import kotlin.time.DurationUnit
-import kotlin.time.Instant
 import kotlin.time.toDuration
 
 /*
@@ -120,6 +132,8 @@ class PlayerParser(val content: ByteArray) {
         val golferScoreAccumulated = reader.readS4()
 
         // researches journey mode goes below
+
+        // TODO: Journey mode is waitin'
         reader.skip(1)
         val researchedItems = reader.readS4()
         println("researchedItems = $researchedItems")
@@ -128,17 +142,17 @@ class PlayerParser(val content: ByteArray) {
         if (true) {
             val outputJson = buildJsonObject {
                 putValue("version", version)
-                putValue("metadata", {
+                putValue("metadata") {
                     putValue("type", metadata.type.name)
                     putValue("revision", metadata.revision)
                     putValue("isFavorite", metadata.isFavorite)
-                })
+                }
                 putValue("name", name)
                 putValue("difficulty", difficulty)
-                putValue("playtime", {
+                putValue("playtime") {
                     putValue("time", playtime)
                     putValue("duration", playtimeDuration.toString())
-                })
+                }
                 putValue("hair", hair)
                 putValue("hairDye", hairDye)
                 putValue("team", team)
@@ -180,7 +194,7 @@ class PlayerParser(val content: ByteArray) {
             }
 
             val outFile = File("src/main/resources/outFile.json")
-            outFile.writeText(Json { prettyPrint = true }.encodeToString(outputJson))
+            outFile.writeText(Json.encodeToString(outputJson))
         }
     }
 
