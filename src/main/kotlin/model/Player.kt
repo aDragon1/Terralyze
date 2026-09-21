@@ -24,3 +24,6 @@ data class Color(
     val g: Int,
     val b: Int
 )
+
+@Serializable
+data class SP(val x: Int, val y: Int, val i: Int, val n: String)

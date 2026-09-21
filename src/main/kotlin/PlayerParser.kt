@@ -7,8 +7,10 @@ import model.*
 import self.adragon.BinaryReader
 import self.adragon.model.FileType
 import java.io.File
+import java.time.LocalDateTime
 import kotlin.time.Duration
 import kotlin.time.DurationUnit
+import kotlin.time.Instant
 import kotlin.time.toDuration
 
 /*
@@ -18,6 +20,7 @@ import kotlin.time.toDuration
 class PlayerParser(val content: ByteArray) {
     fun parse() {
         val reader = BinaryReader(content)
+        println("Total bytes to read - ${reader.leftToRead()}")
 
         val version = reader.readS4()
         val metadata = readMetadata(reader)
@@ -92,13 +95,39 @@ class PlayerParser(val content: ByteArray) {
         val safe = List(40) { readBankItem(reader) }
         val defendersForge = List(40) { readBankItem(reader) }
         val voidVault = List(40) { readInventoryItem(reader) }
-        val voidVaultInfo = reader.readB1()
+        val voidVaultInfo = reader.readU1()
 
+        val buffs = List(44) { readBuff(reader) }.filter { it.id != 0 }
+        val sp = buildList {
+            repeat(200) {
+                val sp = readSP(reader) ?: return@buildList
+                add(sp)
+            }
+        }
+        val hotbarLocked = reader.readBoolean()
+        val hideInfo = List(13) { reader.readBoolean() }
+        val anglerQuestsFinished = reader.readS4()
+        val DpadRadialBinding = List(4) { reader.readS4() }
+
+        val builderAccStatus = List(12) { reader.readS4() }
+        val bartenderQuestLog = reader.readS4()
+
+        val isPlayerDead = reader.readBoolean()
+        val playerRespawnTimer = if (isPlayerDead) reader.readS4() else -1
+
+        val lastTimePlayerWasSaved = reader.readS8()
+
+        val golferScoreAccumulated = reader.readS4()
+
+        // researches journey mode goes below
+        reader.skip(1)
+        val researchedItems = reader.readS4()
+        println("researchedItems = $researchedItems")
+
+        println("Left to read - ${reader.leftToRead()} bytes")
         if (true) {
             val outputJson = buildJsonObject {
                 putValue("version", version)
-
-
                 putValue("metadata", {
                     putValue("type", metadata.type.name)
                     putValue("revision", metadata.revision)
@@ -136,6 +165,18 @@ class PlayerParser(val content: ByteArray) {
                 putValue("defendersForge", defendersForge)
                 putValue("voidVault", voidVault)
                 putValue("voidVaultInfo", voidVaultInfo)
+                putValue("buffs", buffs)
+                putValue("sp", sp)
+                putValue("hotbarLocked", hotbarLocked)
+                putValue("hideInfo", hideInfo)
+                putValue("anglerQuestsFinished", anglerQuestsFinished)
+                putValue("DpadRadialBinding", DpadRadialBinding)
+                putValue("builderAccStatus", builderAccStatus)
+                putValue("bartenderQuestLog", bartenderQuestLog)
+                putValue("isPlayerDead", isPlayerDead)
+                putValue("playerRespawnTimer", playerRespawnTimer)
+                putValue("lastTimePlayerWasSaved", lastTimePlayerWasSaved)
+                putValue("golferScoreAccumulated", golferScoreAccumulated)
             }
 
             val outFile = File("src/main/resources/outFile.json")
@@ -166,6 +207,24 @@ class PlayerParser(val content: ByteArray) {
         val isFavorite = (reader.readU8() and 1uL) == 1uL
 
         return PlayerMetadata(fileType, revision, isFavorite)
+    }
+
+    fun readSP(reader: BinaryReader): SP? {
+        val x = reader.readS4()
+        if (x == -1) return null
+
+        val y = reader.readS4()
+        val i = reader.readS4()
+        val n = reader.readString()
+
+        return SP(x, y, i, n)
+    }
+
+    fun readBuff(reader: BinaryReader): Buff {
+        val id = reader.readS4()
+        val time = reader.readS4()
+
+        return Buff(id, time)
     }
 
     fun readEquipmentItem(reader: BinaryReader): EquipmentItem {

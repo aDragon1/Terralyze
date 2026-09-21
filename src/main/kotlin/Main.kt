@@ -1,6 +1,4 @@
-package self.adragon
-
-import PlayerParser
+import self.adragon.BinaryReader
 import java.io.File
 import javax.crypto.Cipher
 import javax.crypto.spec.IvParameterSpec
@@ -10,8 +8,9 @@ const val ENCRYPTION_KEY = "h3y_gUyZ"
 
 // https://gist.github.com/iconmaster5326/3c723eba0b0ebfc41f85f6b1cc00df91
 fun main() {
-//    val rawBytes = getRawBytes("C:/Users/aDragon/OneDrive/Документы/My Games/Terraria/Players/aDragon.plr")
-    val rawBytes = getRawBytes("C:/Users/aDragon/OneDrive/Документы/My Games/Terraria/Players/aDragonJourney.plr")
+    val rawBytes = getRawBytes("C:/Users/aDragon/OneDrive/Документы/My Games/Terraria/Players/aDragon.plr")
+//    val rawBytes = getRawBytes("C:/Users/aDragon/OneDrive/Документы/My Games/Terraria/Players/aDragonJourney.plr")
+//    val rawBytes = getRawBytes("C:/Users/aDragon/Downloads/Инжир.plr")
 
     val playerParser = PlayerParser(rawBytes)
     playerParser.parse()

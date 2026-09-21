@@ -5,19 +5,19 @@
         "revision": 0,
         "isFavorite": false
     },
-    "name": "aDragonJourney",
-    "difficulty": 3,
+    "name": "aDragon",
+    "difficulty": 0,
     "playtime": {
-        "time": 83085243937,
-        "duration": "2h 18m 28.524393700s"
+        "time": 1750338947887,
+        "duration": "2d 0h 37m 13.894788700s"
     },
-    "hair": 0,
+    "hair": 82,
     "hairDye": 0,
     "team": 0,
     "hideAccessories": [
-        false,
-        false,
-        false,
+        true,
+        true,
+        true,
         false,
         false,
         false,
@@ -27,62 +27,62 @@
         false
     ],
     "hideMisc": 0,
-    "skinVariant": 0,
-    "life": 400,
-    "maxLife": 400,
-    "mana": 60,
-    "maxMana": 20,
-    "hasExtraAccessorySlot": false,
-    "unlockedBiomeTorches": false,
-    "usingBiomeTorches": false,
+    "skinVariant": 3,
+    "life": 500,
+    "maxLife": 500,
+    "mana": 200,
+    "maxMana": 200,
+    "hasExtraAccessorySlot": true,
+    "unlockedBiomeTorches": true,
+    "usingBiomeTorches": true,
     "shimmerUpgrades": {
-        "ateArtisanBread": false,
-        "usedAegisCrystal": false,
-        "usedAegisFruit": false,
-        "usedArcaneCrystal": false,
-        "usedGalaxyPearl": false,
-        "usedGummyWorm": false,
-        "usedAmbrosia": false
+        "ateArtisanBread": true,
+        "usedAegisCrystal": true,
+        "usedAegisFruit": true,
+        "usedArcaneCrystal": true,
+        "usedGalaxyPearl": true,
+        "usedGummyWorm": true,
+        "usedAmbrosia": true
     },
-    "downedDd2Event": false,
-    "taxMoney": 0,
-    "numberOfDeathPVE": 0,
-    "numberOfDeathsPVP": 0,
+    "downedDd2Event": true,
+    "taxMoney": 250100,
+    "numberOfDeathPVE": 463,
+    "numberOfDeathsPVP": 1,
     "playerColors": {
         "hair": {
-            "r": 215,
-            "g": 90,
-            "b": 55
+            "r": 210,
+            "g": 121,
+            "b": 155
         },
         "skin": {
-            "r": 255,
-            "g": 125,
-            "b": 90
+            "r": 241,
+            "g": 115,
+            "b": 93
         },
         "eyes": {
-            "r": 105,
-            "g": 90,
-            "b": 75
+            "r": 21,
+            "g": 23,
+            "b": 73
         },
         "shirt": {
-            "r": 175,
-            "g": 165,
-            "b": 140
+            "r": 61,
+            "g": 127,
+            "b": 97
         },
         "undershirt": {
-            "r": 160,
-            "g": 180,
-            "b": 215
+            "r": 155,
+            "g": 243,
+            "b": 161
         },
         "pants": {
-            "r": 255,
-            "g": 230,
-            "b": 175
+            "r": 249,
+            "g": 85,
+            "b": 143
         },
         "shoes": {
-            "r": 160,
-            "g": 105,
-            "b": 60
+            "r": 141,
+            "g": 187,
+            "b": 69
         }
     },
     "equipment": {
@@ -90,7 +90,30 @@
             {
                 "main": {
                     "item": {
-                        "id": 960,
+                        "id": 3381,
+                        "prefix": 0
+                    },
+                    "favorited": false
+                },
+                "vanity": {
+                    "item": {
+                        "id": 2367,
+                        "prefix": 0
+                    },
+                    "favorited": false
+                },
+                "dye": {
+                    "item": {
+                        "id": 0,
+                        "prefix": 0
+                    },
+                    "favorited": false
+                }
+            },
+            {
+                "main": {
+                    "item": {
+                        "id": 3382,
                         "prefix": 0
                     },
                     "favorited": false
@@ -113,37 +136,14 @@
             {
                 "main": {
                     "item": {
-                        "id": 0,
+                        "id": 3383,
                         "prefix": 0
                     },
                     "favorited": false
                 },
                 "vanity": {
                     "item": {
-                        "id": 0,
-                        "prefix": 0
-                    },
-                    "favorited": false
-                },
-                "dye": {
-                    "item": {
-                        "id": 0,
-                        "prefix": 0
-                    },
-                    "favorited": false
-                }
-            },
-            {
-                "main": {
-                    "item": {
-                        "id": 5001,
-                        "prefix": 0
-                    },
-                    "favorited": false
-                },
-                "vanity": {
-                    "item": {
-                        "id": 0,
+                        "id": 2369,
                         "prefix": 0
                     },
                     "favorited": false
@@ -161,14 +161,14 @@
             {
                 "main": {
                     "item": {
-                        "id": 4978,
-                        "prefix": 0
+                        "id": 1845,
+                        "prefix": 72
                     },
                     "favorited": false
                 },
                 "vanity": {
                     "item": {
-                        "id": 5506,
+                        "id": 4054,
                         "prefix": 0
                     },
                     "favorited": false
@@ -184,14 +184,37 @@
             {
                 "main": {
                     "item": {
-                        "id": 4055,
-                        "prefix": 0
+                        "id": 5000,
+                        "prefix": 72
                     },
                     "favorited": false
                 },
                 "vanity": {
                     "item": {
+                        "id": 1864,
+                        "prefix": 72
+                    },
+                    "favorited": false
+                },
+                "dye": {
+                    "item": {
                         "id": 0,
+                        "prefix": 0
+                    },
+                    "favorited": false
+                }
+            },
+            {
+                "main": {
+                    "item": {
+                        "id": 6162,
+                        "prefix": 72
+                    },
+                    "favorited": false
+                },
+                "vanity": {
+                    "item": {
+                        "id": 2423,
                         "prefix": 0
                     },
                     "favorited": false
@@ -207,14 +230,14 @@
             {
                 "main": {
                     "item": {
-                        "id": 53,
-                        "prefix": 0
+                        "id": 6163,
+                        "prefix": 72
                     },
                     "favorited": false
                 },
                 "vanity": {
                     "item": {
-                        "id": 0,
+                        "id": 5504,
                         "prefix": 0
                     },
                     "favorited": false
@@ -230,54 +253,8 @@
             {
                 "main": {
                     "item": {
-                        "id": 3333,
-                        "prefix": 77
-                    },
-                    "favorited": false
-                },
-                "vanity": {
-                    "item": {
-                        "id": 0,
-                        "prefix": 0
-                    },
-                    "favorited": false
-                },
-                "dye": {
-                    "item": {
-                        "id": 0,
-                        "prefix": 0
-                    },
-                    "favorited": false
-                }
-            },
-            {
-                "main": {
-                    "item": {
-                        "id": 887,
-                        "prefix": 73
-                    },
-                    "favorited": false
-                },
-                "vanity": {
-                    "item": {
-                        "id": 1132,
-                        "prefix": 78
-                    },
-                    "favorited": false
-                },
-                "dye": {
-                    "item": {
-                        "id": 0,
-                        "prefix": 0
-                    },
-                    "favorited": false
-                }
-            },
-            {
-                "main": {
-                    "item": {
-                        "id": 0,
-                        "prefix": 0
+                        "id": 1158,
+                        "prefix": 72
                     },
                     "favorited": false
                 },
@@ -299,15 +276,38 @@
             {
                 "main": {
                     "item": {
-                        "id": 211,
-                        "prefix": 0
+                        "id": 2998,
+                        "prefix": 72
                     },
                     "favorited": false
                 },
                 "vanity": {
                     "item": {
+                        "id": 5140,
+                        "prefix": 76
+                    },
+                    "favorited": false
+                },
+                "dye": {
+                    "item": {
                         "id": 0,
                         "prefix": 0
+                    },
+                    "favorited": false
+                }
+            },
+            {
+                "main": {
+                    "item": {
+                        "id": 935,
+                        "prefix": 72
+                    },
+                    "favorited": false
+                },
+                "vanity": {
+                    "item": {
+                        "id": 5064,
+                        "prefix": 64
                     },
                     "favorited": false
                 },
@@ -323,7 +323,7 @@
         "misc": [
             {
                 "main": {
-                    "id": 4802,
+                    "id": 4810,
                     "prefix": 0
                 },
                 "dye": {
@@ -333,7 +333,7 @@
             },
             {
                 "main": {
-                    "id": 0,
+                    "id": 3577,
                     "prefix": 0
                 },
                 "dye": {
@@ -343,7 +343,7 @@
             },
             {
                 "main": {
-                    "id": 4426,
+                    "id": 4469,
                     "prefix": 0
                 },
                 "dye": {
@@ -353,7 +353,7 @@
             },
             {
                 "main": {
-                    "id": 0,
+                    "id": 4444,
                     "prefix": 0
                 },
                 "dye": {
@@ -363,7 +363,7 @@
             },
             {
                 "main": {
-                    "id": 84,
+                    "id": 4980,
                     "prefix": 0
                 },
                 "dye": {
@@ -376,39 +376,7 @@
     "inventory": [
         {
             "item": {
-                "id": 1123,
-                "prefix": 0
-            },
-            "stack": 1,
-            "favorited": false
-        },
-        {
-            "item": {
-                "id": 3521,
-                "prefix": 54
-            },
-            "stack": 1,
-            "favorited": true
-        },
-        {
-            "item": {
-                "id": 3518,
-                "prefix": 43
-            },
-            "stack": 1,
-            "favorited": true
-        },
-        {
-            "item": {
-                "id": 1121,
-                "prefix": 0
-            },
-            "stack": 1,
-            "favorited": false
-        },
-        {
-            "item": {
-                "id": 4062,
+                "id": 5335,
                 "prefix": 0
             },
             "stack": 1,
@@ -416,7 +384,39 @@
         },
         {
             "item": {
-                "id": 3517,
+                "id": 5480,
+                "prefix": 81
+            },
+            "stack": 1,
+            "favorited": true
+        },
+        {
+            "item": {
+                "id": 4914,
+                "prefix": 81
+            },
+            "stack": 1,
+            "favorited": true
+        },
+        {
+            "item": {
+                "id": 4678,
+                "prefix": 81
+            },
+            "stack": 1,
+            "favorited": true
+        },
+        {
+            "item": {
+                "id": 4680,
+                "prefix": 81
+            },
+            "stack": 1,
+            "favorited": true
+        },
+        {
+            "item": {
+                "id": 3464,
                 "prefix": 0
             },
             "stack": 1,
@@ -424,7 +424,47 @@
         },
         {
             "item": {
-                "id": 2888,
+                "id": 5005,
+                "prefix": 85
+            },
+            "stack": 1,
+            "favorited": true
+        },
+        {
+            "item": {
+                "id": 3571,
+                "prefix": 85
+            },
+            "stack": 1,
+            "favorited": true
+        },
+        {
+            "item": {
+                "id": 557,
+                "prefix": 0
+            },
+            "stack": 9990,
+            "favorited": true
+        },
+        {
+            "item": {
+                "id": 556,
+                "prefix": 0
+            },
+            "stack": 9957,
+            "favorited": true
+        },
+        {
+            "item": {
+                "id": 3544,
+                "prefix": 0
+            },
+            "stack": 194,
+            "favorited": true
+        },
+        {
+            "item": {
+                "id": 5359,
                 "prefix": 0
             },
             "stack": 1,
@@ -432,55 +472,7 @@
         },
         {
             "item": {
-                "id": 0,
-                "prefix": 0
-            },
-            "stack": 0,
-            "favorited": false
-        },
-        {
-            "item": {
-                "id": 0,
-                "prefix": 0
-            },
-            "stack": 0,
-            "favorited": false
-        },
-        {
-            "item": {
-                "id": 0,
-                "prefix": 0
-            },
-            "stack": 0,
-            "favorited": false
-        },
-        {
-            "item": {
-                "id": 50,
-                "prefix": 0
-            },
-            "stack": 1,
-            "favorited": true
-        },
-        {
-            "item": {
-                "id": 5012,
-                "prefix": 38
-            },
-            "stack": 1,
-            "favorited": true
-        },
-        {
-            "item": {
-                "id": 0,
-                "prefix": 0
-            },
-            "stack": 0,
-            "favorited": false
-        },
-        {
-            "item": {
-                "id": 4281,
+                "id": 4131,
                 "prefix": 0
             },
             "stack": 1,
@@ -528,11 +520,99 @@
         },
         {
             "item": {
+                "id": 1293,
+                "prefix": 0
+            },
+            "stack": 9977,
+            "favorited": true
+        },
+        {
+            "item": {
+                "id": 3601,
+                "prefix": 0
+            },
+            "stack": 9969,
+            "favorited": true
+        },
+        {
+            "item": {
+                "id": 3213,
+                "prefix": 0
+            },
+            "stack": 1,
+            "favorited": true
+        },
+        {
+            "item": {
+                "id": 2768,
+                "prefix": 0
+            },
+            "stack": 1,
+            "favorited": true
+        },
+        {
+            "item": {
+                "id": 3525,
+                "prefix": 0
+            },
+            "stack": 1,
+            "favorited": true
+        },
+        {
+            "item": {
                 "id": 0,
                 "prefix": 0
             },
             "stack": 0,
             "favorited": false
+        },
+        {
+            "item": {
+                "id": 0,
+                "prefix": 0
+            },
+            "stack": 0,
+            "favorited": false
+        },
+        {
+            "item": {
+                "id": 0,
+                "prefix": 0
+            },
+            "stack": 0,
+            "favorited": false
+        },
+        {
+            "item": {
+                "id": 0,
+                "prefix": 0
+            },
+            "stack": 0,
+            "favorited": false
+        },
+        {
+            "item": {
+                "id": 0,
+                "prefix": 0
+            },
+            "stack": 0,
+            "favorited": false
+        },
+        {
+            "item": {
+                "id": 544,
+                "prefix": 0
+            },
+            "stack": 9974,
+            "favorited": true
+        },
+        {
+            "item": {
+                "id": 267,
+                "prefix": 0
+            },
+            "stack": 6,
+            "favorited": true
         },
         {
             "item": {
@@ -696,90 +776,10 @@
         },
         {
             "item": {
-                "id": 0,
+                "id": 74,
                 "prefix": 0
             },
-            "stack": 0,
-            "favorited": false
-        },
-        {
-            "item": {
-                "id": 0,
-                "prefix": 0
-            },
-            "stack": 0,
-            "favorited": false
-        },
-        {
-            "item": {
-                "id": 0,
-                "prefix": 0
-            },
-            "stack": 0,
-            "favorited": false
-        },
-        {
-            "item": {
-                "id": 0,
-                "prefix": 0
-            },
-            "stack": 0,
-            "favorited": false
-        },
-        {
-            "item": {
-                "id": 0,
-                "prefix": 0
-            },
-            "stack": 0,
-            "favorited": false
-        },
-        {
-            "item": {
-                "id": 0,
-                "prefix": 0
-            },
-            "stack": 0,
-            "favorited": false
-        },
-        {
-            "item": {
-                "id": 0,
-                "prefix": 0
-            },
-            "stack": 0,
-            "favorited": false
-        },
-        {
-            "item": {
-                "id": 0,
-                "prefix": 0
-            },
-            "stack": 0,
-            "favorited": false
-        },
-        {
-            "item": {
-                "id": 0,
-                "prefix": 0
-            },
-            "stack": 0,
-            "favorited": false
-        },
-        {
-            "item": {
-                "id": 0,
-                "prefix": 0
-            },
-            "stack": 0,
-            "favorited": false
-        },
-        {
-            "item": {
-                "id": 0,
-                "prefix": 0
-            },
-            "stack": 0,
+            "stack": 2,
             "favorited": false
         },
         {
@@ -787,23 +787,39 @@
                 "id": 73,
                 "prefix": 0
             },
-            "stack": 100,
+            "stack": 77,
             "favorited": false
         },
         {
             "item": {
-                "id": 73,
+                "id": 72,
                 "prefix": 0
             },
-            "stack": 5,
+            "stack": 4,
             "favorited": false
         },
         {
             "item": {
-                "id": 0,
+                "id": 71,
                 "prefix": 0
             },
-            "stack": 0,
+            "stack": 3,
+            "favorited": false
+        },
+        {
+            "item": {
+                "id": 780,
+                "prefix": 0
+            },
+            "stack": 5963,
+            "favorited": false
+        },
+        {
+            "item": {
+                "id": 781,
+                "prefix": 0
+            },
+            "stack": 1358,
             "favorited": false
         },
         {
@@ -811,272 +827,256 @@
                 "id": 40,
                 "prefix": 0
             },
-            "stack": 9294,
+            "stack": 19,
             "favorited": false
         },
         {
             "item": {
-                "id": 41,
+                "id": 278,
                 "prefix": 0
             },
-            "stack": 82,
-            "favorited": false
-        },
-        {
-            "item": {
-                "id": 931,
-                "prefix": 0
-            },
-            "stack": 75,
-            "favorited": false
-        },
-        {
-            "item": {
-                "id": 97,
-                "prefix": 0
-            },
-            "stack": 9999,
+            "stack": 371,
             "favorited": false
         }
     ],
     "piggyBank": [
         {
             "item": {
-                "id": 0,
+                "id": 74,
                 "prefix": 0
             },
-            "stack": 0
+            "stack": 9999
         },
         {
             "item": {
-                "id": 0,
+                "id": 74,
                 "prefix": 0
             },
-            "stack": 0
+            "stack": 9995
         },
         {
             "item": {
-                "id": 0,
+                "id": 73,
                 "prefix": 0
             },
-            "stack": 0
+            "stack": 75
         },
         {
             "item": {
-                "id": 0,
+                "id": 72,
                 "prefix": 0
             },
-            "stack": 0
+            "stack": 97
         },
         {
             "item": {
-                "id": 0,
+                "id": 71,
                 "prefix": 0
             },
-            "stack": 0
+            "stack": 79
         },
         {
             "item": {
-                "id": 0,
+                "id": 3031,
                 "prefix": 0
             },
-            "stack": 0
+            "stack": 1
         },
         {
             "item": {
-                "id": 0,
+                "id": 4820,
                 "prefix": 0
             },
-            "stack": 0
+            "stack": 1
         },
         {
             "item": {
-                "id": 0,
+                "id": 5302,
                 "prefix": 0
             },
-            "stack": 0
+            "stack": 1
         },
         {
             "item": {
-                "id": 0,
+                "id": 5364,
                 "prefix": 0
             },
-            "stack": 0
+            "stack": 1
         },
         {
             "item": {
-                "id": 0,
+                "id": 3032,
                 "prefix": 0
             },
-            "stack": 0
+            "stack": 1
         },
         {
             "item": {
-                "id": 0,
+                "id": 5134,
                 "prefix": 0
             },
-            "stack": 0
+            "stack": 1
         },
         {
             "item": {
-                "id": 0,
+                "id": 2294,
                 "prefix": 0
             },
-            "stack": 0
+            "stack": 1
         },
         {
             "item": {
-                "id": 0,
+                "id": 2676,
                 "prefix": 0
             },
-            "stack": 0
+            "stack": 50
         },
         {
             "item": {
-                "id": 0,
+                "id": 327,
                 "prefix": 0
             },
-            "stack": 0
+            "stack": 3
         },
         {
             "item": {
-                "id": 0,
+                "id": 329,
                 "prefix": 0
             },
-            "stack": 0
+            "stack": 1
         },
         {
             "item": {
-                "id": 0,
+                "id": 1536,
                 "prefix": 0
             },
-            "stack": 0
+            "stack": 1
         },
         {
             "item": {
-                "id": 0,
+                "id": 3384,
                 "prefix": 0
             },
-            "stack": 0
+            "stack": 1
         },
         {
             "item": {
-                "id": 0,
+                "id": 296,
                 "prefix": 0
             },
-            "stack": 0
+            "stack": 16
         },
         {
             "item": {
-                "id": 0,
+                "id": 300,
                 "prefix": 0
             },
-            "stack": 0
+            "stack": 9996
         },
         {
             "item": {
-                "id": 0,
+                "id": 4271,
                 "prefix": 0
             },
-            "stack": 0
+            "stack": 8
         },
         {
             "item": {
-                "id": 0,
+                "id": 2766,
                 "prefix": 0
             },
-            "stack": 0
+            "stack": 110
         },
         {
             "item": {
-                "id": 0,
+                "id": 4821,
                 "prefix": 0
             },
-            "stack": 0
+            "stack": 1
         },
         {
             "item": {
-                "id": 0,
+                "id": 5667,
                 "prefix": 0
             },
-            "stack": 0
+            "stack": 1
         },
         {
             "item": {
-                "id": 0,
+                "id": 3828,
                 "prefix": 0
             },
-            "stack": 0
+            "stack": 24
         },
         {
             "item": {
-                "id": 0,
+                "id": 3817,
                 "prefix": 0
             },
-            "stack": 0
+            "stack": 250
         },
         {
             "item": {
-                "id": 0,
+                "id": 5299,
                 "prefix": 0
             },
-            "stack": 0
+            "stack": 10
         },
         {
             "item": {
-                "id": 0,
+                "id": 1705,
                 "prefix": 0
             },
-            "stack": 0
+            "stack": 1
         },
         {
             "item": {
-                "id": 0,
+                "id": 4101,
                 "prefix": 0
             },
-            "stack": 0
+            "stack": 7
         },
         {
             "item": {
-                "id": 0,
+                "id": 1859,
                 "prefix": 0
             },
-            "stack": 0
+            "stack": 8
         },
         {
             "item": {
-                "id": 0,
+                "id": 4276,
                 "prefix": 0
             },
-            "stack": 0
+            "stack": 5
         },
         {
             "item": {
-                "id": 0,
+                "id": 2355,
                 "prefix": 0
             },
-            "stack": 0
+            "stack": 100
         },
         {
             "item": {
-                "id": 0,
+                "id": 5211,
                 "prefix": 0
             },
-            "stack": 0
+            "stack": 9957
         },
         {
             "item": {
-                "id": 0,
+                "id": 2354,
                 "prefix": 0
             },
-            "stack": 0
+            "stack": 71
         },
         {
             "item": {
-                "id": 0,
+                "id": 2356,
                 "prefix": 0
             },
-            "stack": 0
+            "stack": 106
         },
         {
             "item": {
@@ -1688,106 +1688,106 @@
     "voidVault": [
         {
             "item": {
-                "id": 0,
+                "id": 2349,
                 "prefix": 0
             },
-            "stack": 0,
+            "stack": 9716,
             "favorited": false
         },
         {
             "item": {
-                "id": 0,
+                "id": 301,
                 "prefix": 0
             },
-            "stack": 0,
+            "stack": 9743,
             "favorited": false
         },
         {
             "item": {
-                "id": 0,
+                "id": 2326,
                 "prefix": 0
             },
-            "stack": 0,
+            "stack": 9744,
             "favorited": false
         },
         {
             "item": {
-                "id": 0,
+                "id": 1353,
                 "prefix": 0
             },
-            "stack": 0,
+            "stack": 1,
             "favorited": false
         },
         {
             "item": {
-                "id": 0,
+                "id": 2345,
                 "prefix": 0
             },
-            "stack": 0,
+            "stack": 9742,
             "favorited": false
         },
         {
             "item": {
-                "id": 0,
+                "id": 292,
                 "prefix": 0
             },
-            "stack": 0,
+            "stack": 9742,
             "favorited": false
         },
         {
             "item": {
-                "id": 0,
+                "id": 290,
                 "prefix": 0
             },
-            "stack": 0,
+            "stack": 9743,
             "favorited": false
         },
         {
             "item": {
-                "id": 0,
+                "id": 2348,
                 "prefix": 0
             },
-            "stack": 0,
+            "stack": 9716,
             "favorited": false
         },
         {
             "item": {
-                "id": 0,
+                "id": 289,
                 "prefix": 0
             },
-            "stack": 0,
+            "stack": 9743,
             "favorited": false
         },
         {
             "item": {
-                "id": 0,
+                "id": 2346,
                 "prefix": 0
             },
-            "stack": 0,
+            "stack": 9716,
             "favorited": false
         },
         {
             "item": {
-                "id": 0,
+                "id": 2347,
                 "prefix": 0
             },
-            "stack": 0,
+            "stack": 9717,
             "favorited": false
         },
         {
             "item": {
-                "id": 0,
+                "id": 1356,
                 "prefix": 0
             },
-            "stack": 0,
+            "stack": 9963,
             "favorited": false
         },
         {
             "item": {
-                "id": 0,
+                "id": 2328,
                 "prefix": 0
             },
-            "stack": 0,
+            "stack": 9742,
             "favorited": false
         },
         {
@@ -2007,5 +2007,62 @@
             "favorited": false
         }
     ],
-    "voidVaultInfo": 0
+    "voidVaultInfo": 1,
+    "buffs": [
+        {
+            "id": 297,
+            "time": 18000
+        },
+        {
+            "id": 190,
+            "time": 18000
+        },
+        {
+            "id": 73,
+            "time": 47688
+        }
+    ],
+    "sp": [],
+    "hotbarLocked": false,
+    "hideInfo": [
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        true,
+        true,
+        false,
+        true,
+        true,
+        false,
+        false
+    ],
+    "anglerQuestsFinished": 31,
+    "DpadRadialBinding": [
+        -1,
+        -1,
+        -1,
+        -1
+    ],
+    "builderAccStatus": [
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+    ],
+    "bartenderQuestLog": 1,
+    "isPlayerDead": false,
+    "playerRespawnTimer": -1,
+    "lastTimePlayerWasSaved": 5250942174105344067,
+    "golferScoreAccumulated": 0
 }
