@@ -1,12 +1,13 @@
 package model
 
+import kotlinx.serialization.Serializable
 import self.adragon.model.FileType
-import java.awt.Color
 
 data class Player(val metadata: PlayerMetadata, val colors: PlayerColors)
 
 data class PlayerMetadata(val type: FileType, val revision: UInt, val isFavorite: Boolean)
 
+@Serializable
 data class PlayerColors(
     val hair: Color,
     val skin: Color,
@@ -15,4 +16,11 @@ data class PlayerColors(
     val undershirt: Color,
     val pants: Color,
     val shoes: Color
+)
+
+@Serializable
+data class Color(
+    val r: Int,
+    val g: Int,
+    val b: Int
 )

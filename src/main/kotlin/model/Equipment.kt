@@ -1,5 +1,8 @@
 package model
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class Equipment(
     val armor: List<EquipmentSlot>,
     val accessories: List<EquipmentSlot>,
@@ -49,15 +52,24 @@ data class Equipment(
     }
 }
 
+@Serializable
 data class EquipmentSlot(
     val main: EquipmentItem,
     val vanity: EquipmentItem,
     val dye: EquipmentItem
 )
 
+@Serializable
 data class MiscEquipmentSlot(val main: Item, val dye: Item)
 
+@Serializable
 data class InventoryItem(val item: Item, val stack: Int, val favorited: Boolean)
+
+@Serializable
 data class BankItem(val item: Item, val stack: Int)
+
+@Serializable
 data class EquipmentItem(val item: Item, val favorited: Boolean)
+
+@Serializable
 data class Item(val id: Int, val prefix: UByte)

@@ -1,5 +1,8 @@
 package model
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class ShimmerUpgrades(
     val ateArtisanBread: Boolean,
     val usedAegisCrystal: Boolean,

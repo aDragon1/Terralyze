@@ -1,16 +1,12 @@
-import model.BankItem
-import model.Equipment
-import self.adragon.model.FileType
-import model.EquipmentItem
-import model.EquipmentSlot
-import model.ShimmerUpgrades
-import model.InventoryItem
-import model.Item
-import model.MiscEquipmentSlot
-import model.PlayerColors
-import model.PlayerMetadata
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObjectBuilder
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.encodeToJsonElement
+import model.*
 import self.adragon.BinaryReader
-import java.awt.Color
+import self.adragon.model.FileType
+import java.io.File
 import kotlin.time.Duration
 import kotlin.time.DurationUnit
 import kotlin.time.toDuration
@@ -95,36 +91,55 @@ class PlayerParser(val content: ByteArray) {
         val piggyBank = List(40) { readBankItem(reader) }
         val safe = List(40) { readBankItem(reader) }
         val defendersForge = List(40) { readBankItem(reader) }
-        val voidVault = List(40) { readBankItem(reader) }
+        val voidVault = List(40) { readInventoryItem(reader) }
         val voidVaultInfo = reader.readB1()
 
         if (true) {
-            println("version = $version")
-            println("metadata = $metadata")
-            println("name = $name")
-            println("difficulty = $difficulty")
-            println("playtime = $playtime")
-            println("hair = $hair")
-            println("hairDye = $hairDye")
-            println("team = $team")
-            println("hideAccessories = $hideAccessories")
-            println("hideMisc = $hideMisc")
-            println("skinVariant = $skinVariant")
-            println("life = $life")
-            println("maxLife = $maxLife")
-            println("mana = $mana")
-            println("maxMana = $maxMana")
-            println("hasExtraAccessorySlot = $hasExtraAccessorySlot")
-            println("unlockedBiomeTorches = $unlockedBiomeTorches")
-            println("usingBiomeTorches = $usingBiomeTorches")
-            println("shimmerUpgrades = $shimmerUpgrades")
-            println("downedDd2Event = $downedDd2Event")
-            println("taxMoney = $taxMoney")
-            println("numberOfDeathPVE = $numberOfDeathPVE")
-            println("numberOfDeathsPVP = $numberOfDeathsPVP")
-            println("playerColors = $playerColors")
-            println("equipment = $equipment")
-            println("inventory = $inventory")
+            val outputJson = buildJsonObject {
+                putValue("version", version)
+
+
+                putValue("metadata", {
+                    putValue("type", metadata.type.name)
+                    putValue("revision", metadata.revision)
+                    putValue("isFavorite", metadata.isFavorite)
+                })
+                putValue("name", name)
+                putValue("difficulty", difficulty)
+                putValue("playtime", {
+                    putValue("time", playtime)
+                    putValue("duration", playtimeDuration.toString())
+                })
+                putValue("hair", hair)
+                putValue("hairDye", hairDye)
+                putValue("team", team)
+                putValue("hideAccessories", hideAccessories)
+                putValue("hideMisc", hideMisc)
+                putValue("skinVariant", skinVariant)
+                putValue("life", life)
+                putValue("maxLife", maxLife)
+                putValue("mana", mana)
+                putValue("maxMana", maxMana)
+                putValue("hasExtraAccessorySlot", hasExtraAccessorySlot)
+                putValue("unlockedBiomeTorches", unlockedBiomeTorches)
+                putValue("usingBiomeTorches", usingBiomeTorches)
+                putValue("shimmerUpgrades", shimmerUpgrades)
+                putValue("downedDd2Event", downedDd2Event)
+                putValue("taxMoney", taxMoney)
+                putValue("numberOfDeathPVE", numberOfDeathPVE)
+                putValue("numberOfDeathsPVP", numberOfDeathsPVP)
+                putValue("playerColors", playerColors)
+                putValue("equipment", equipment)
+                putValue("inventory", inventory)
+                putValue("piggyBank", piggyBank)
+                putValue("safe", safe)
+                putValue("defendersForge", defendersForge)
+                putValue("voidVault", voidVault)
+                putValue("voidVaultInfo", voidVaultInfo)
+            }
+
+            val outFile = File("src/main/resources/outFile.json")
+            outFile.writeText(Json { prettyPrint = true }.encodeToString(outputJson))
         }
     }
 
@@ -195,4 +210,12 @@ class PlayerParser(val content: ByteArray) {
 
         return Color(r, g, b)
     }
+}
+
+inline fun <reified T> JsonObjectBuilder.putValue(key: String, value: T) {
+    put(key, Json.encodeToJsonElement(value))
+}
+
+inline fun JsonObjectBuilder.putValue(key: String, block: JsonObjectBuilder.() -> Unit) {
+    put(key, buildJsonObject(block))
 }
