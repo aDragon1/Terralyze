@@ -1,4 +1,4 @@
-package core.model
+package terralyze.playerfile.model
 
 enum class FileType(val type: Int) {
     None(0),

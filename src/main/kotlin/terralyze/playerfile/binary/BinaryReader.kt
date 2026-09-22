@@ -1,8 +1,7 @@
-package self.adragon
+package terralyze.playerfile.binary
 
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
-
 
 class BinaryReader(
     private val data: ByteArray

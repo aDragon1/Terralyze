@@ -1,36 +1,28 @@
-package core.parser
+package terralyze.playerfile
 
-import Buff
-import core.model.Color
-import core.model.equipment.Equipment
-import core.model.equipment.EquipmentSlot
-import core.model.equipment.MiscEquipmentSlot
-import core.model.player.PlayerColors
-import core.model.player.PlayerMetadata
-import core.model.player.SP
-import core.model.player.ShimmerUpgrades
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonObjectBuilder
-import kotlinx.serialization.json.buildJsonObject
-import kotlinx.serialization.json.encodeToJsonElement
-import self.adragon.BinaryReader
-import core.model.FileType
-import core.model.item.BankItem
-import core.model.item.EquipmentItem
-import core.model.item.InventoryItem
-import core.model.item.Item
-import java.io.File
-import kotlin.time.Duration
-import kotlin.time.DurationUnit
-import kotlin.time.toDuration
+import terralyze.playerfile.model.Color
+import terralyze.playerfile.model.FileType
+import terralyze.playerfile.model.equipment.Equipment
+import terralyze.playerfile.model.equipment.EquipmentSlot
+import terralyze.playerfile.model.equipment.MiscEquipmentSlot
+import terralyze.playerfile.model.item.BankItem
+import terralyze.playerfile.model.item.EquipmentItem
+import terralyze.playerfile.model.item.InventoryItem
+import terralyze.playerfile.model.item.Item
+import terralyze.playerfile.model.player.Buff
+import terralyze.playerfile.model.player.ParsedPlayer
+import terralyze.playerfile.model.player.PlayerColors
+import terralyze.playerfile.model.player.PlayerMetadata
+import terralyze.playerfile.model.player.SP
+import terralyze.playerfile.model.player.ShimmerUpgrades
+import terralyze.playerfile.binary.BinaryReader
 
 /*
 * Take and readapt source code of the https://terraria-research-tracker.free.nf
 * Thank's, I suppose?
 */
-class PlayerParser(val content: ByteArray) {
-    fun parse() {
+class PlayerParser() {
+    fun parse(content: ByteArray): ParsedPlayer {
         val reader = BinaryReader(content)
         println("Total bytes to read - ${reader.leftToRead()}")
 
@@ -40,7 +32,6 @@ class PlayerParser(val content: ByteArray) {
         val name = reader.readString()
         val difficulty = reader.readU1()
         val playtime = reader.readS8()
-        val playtimeDuration: Duration = (playtime * 100).toDuration(DurationUnit.NANOSECONDS)
         val hair = reader.readS4()
         val hairDye = reader.readU1()
         val team = reader.readU1()
@@ -76,7 +67,7 @@ class PlayerParser(val content: ByteArray) {
         val downedDd2Event = reader.readBoolean()
         val taxMoney = reader.readS4()
 
-        val numberOfDeathPVE = reader.readS4()
+        val numberOfDeathsPVE = reader.readS4()
         val numberOfDeathsPVP = reader.readS4()
 
         val playerColors = PlayerColors(
@@ -119,7 +110,7 @@ class PlayerParser(val content: ByteArray) {
         val hotbarLocked = reader.readBoolean()
         val hideInfo = List(13) { reader.readBoolean() }
         val anglerQuestsFinished = reader.readS4()
-        val DpadRadialBinding = List(4) { reader.readS4() }
+        val dpadRadialBinding = List(4) { reader.readS4() }
 
         val builderAccStatus = List(12) { reader.readS4() }
         val bartenderQuestLog = reader.readS4()
@@ -139,66 +130,56 @@ class PlayerParser(val content: ByteArray) {
         println("researchedItems = $researchedItems")
 
         println("Left to read - ${reader.leftToRead()} bytes")
-        if (true) {
-            val outputJson = buildJsonObject {
-                putValue("version", version)
-                putValue("metadata") {
-                    putValue("type", metadata.type.name)
-                    putValue("revision", metadata.revision)
-                    putValue("isFavorite", metadata.isFavorite)
-                }
-                putValue("name", name)
-                putValue("difficulty", difficulty)
-                putValue("playtime") {
-                    putValue("time", playtime)
-                    putValue("duration", playtimeDuration.toString())
-                }
-                putValue("hair", hair)
-                putValue("hairDye", hairDye)
-                putValue("team", team)
-                putValue("hideAccessories", hideAccessories)
-                putValue("hideMisc", hideMisc)
-                putValue("skinVariant", skinVariant)
-                putValue("life", life)
-                putValue("maxLife", maxLife)
-                putValue("mana", mana)
-                putValue("maxMana", maxMana)
-                putValue("hasExtraAccessorySlot", hasExtraAccessorySlot)
-                putValue("unlockedBiomeTorches", unlockedBiomeTorches)
-                putValue("usingBiomeTorches", usingBiomeTorches)
-                putValue("shimmerUpgrades", shimmerUpgrades)
-                putValue("downedDd2Event", downedDd2Event)
-                putValue("taxMoney", taxMoney)
-                putValue("numberOfDeathPVE", numberOfDeathPVE)
-                putValue("numberOfDeathsPVP", numberOfDeathsPVP)
-                putValue("playerColors", playerColors)
-                putValue("equipment", equipment)
-                putValue("inventory", inventory)
-                putValue("piggyBank", piggyBank)
-                putValue("safe", safe)
-                putValue("defendersForge", defendersForge)
-                putValue("voidVault", voidVault)
-                putValue("voidVaultInfo", voidVaultInfo)
-                putValue("buffs", buffs)
-                putValue("sp", sp)
-                putValue("hotbarLocked", hotbarLocked)
-                putValue("hideInfo", hideInfo)
-                putValue("anglerQuestsFinished", anglerQuestsFinished)
-                putValue("DpadRadialBinding", DpadRadialBinding)
-                putValue("builderAccStatus", builderAccStatus)
-                putValue("bartenderQuestLog", bartenderQuestLog)
-                putValue("isPlayerDead", isPlayerDead)
-                putValue("playerRespawnTimer", playerRespawnTimer)
-                putValue("lastTimePlayerWasSaved", lastTimePlayerWasSaved)
-                putValue("golferScoreAccumulated", golferScoreAccumulated)
-            }
 
-            val outFile = File("src/main/resources/outFile.json")
-            outFile.writeText(Json.encodeToString(outputJson))
-        }
+        return ParsedPlayer(
+            version = version,
+            metadata = metadata,
+            name = name,
+            difficulty = difficulty,
+            playtimeTicks = playtime,
+            hair = hair,
+            hairDye = hairDye,
+            team = team,
+            hideAccessories = hideAccessories,
+            hideMisc = hideMisc,
+            skinVariant = skinVariant,
+            life = life,
+            maxLife = maxLife,
+            mana = mana,
+            maxMana = maxMana,
+            hasExtraAccessorySlot = hasExtraAccessorySlot,
+            unlockedBiomeTorches = unlockedBiomeTorches,
+            usingBiomeTorches = usingBiomeTorches,
+            shimmerUpgrades = shimmerUpgrades,
+            downedDd2Event = downedDd2Event,
+            taxMoney = taxMoney,
+            numberOfDeathsPVE = numberOfDeathsPVE,
+            numberOfDeathsPVP = numberOfDeathsPVP,
+            colors = playerColors,
+            equipment = equipment,
+            inventory = inventory,
+            piggyBank = piggyBank,
+            safe = safe,
+            defendersForge = defendersForge,
+            voidVault = voidVault,
+            voidVaultInfo = voidVaultInfo,
+            buffs = buffs,
+            sp = sp,
+            hotbarLocked = hotbarLocked,
+            hideInfo = hideInfo,
+            anglerQuestsFinished = anglerQuestsFinished,
+            dpadRadialBinding = dpadRadialBinding,
+            builderAccStatus = builderAccStatus,
+            bartenderQuestLog = bartenderQuestLog,
+            isPlayerDead = isPlayerDead,
+            playerRespawnTimer = playerRespawnTimer,
+            lastTimePlayerWasSaved = lastTimePlayerWasSaved,
+            golferScoreAccumulated = golferScoreAccumulated,
+            researchedItems = researchedItems
+        )
     }
 
-    fun readMetadata(reader: BinaryReader): PlayerMetadata {
+    private fun readMetadata(reader: BinaryReader): PlayerMetadata {
         val metadataHeader = reader.readU8()
         val signatureMask = 0xFFFFFFFFFFFFFFuL
         val metadataSignature = 27981915666277746uL
@@ -223,7 +204,7 @@ class PlayerParser(val content: ByteArray) {
         return PlayerMetadata(fileType, revision, isFavorite)
     }
 
-    fun readSP(reader: BinaryReader): SP? {
+    private fun readSP(reader: BinaryReader): SP? {
         val x = reader.readS4()
         if (x == -1) return null
 
@@ -234,14 +215,14 @@ class PlayerParser(val content: ByteArray) {
         return SP(x, y, i, n)
     }
 
-    fun readBuff(reader: BinaryReader): Buff {
+    private fun readBuff(reader: BinaryReader): Buff {
         val id = reader.readS4()
         val time = reader.readS4()
 
         return Buff(id, time)
     }
 
-    fun readEquipmentItem(reader: BinaryReader): EquipmentItem {
+    private fun readEquipmentItem(reader: BinaryReader): EquipmentItem {
         val id = reader.readS4()
         val prefix = reader.readU1()
         val favorited = reader.readBoolean()
@@ -249,7 +230,7 @@ class PlayerParser(val content: ByteArray) {
         return EquipmentItem(Item(id, prefix), favorited)
     }
 
-    fun readMiscEquipmentSlot(reader: BinaryReader): MiscEquipmentSlot {
+    private fun readMiscEquipmentSlot(reader: BinaryReader): MiscEquipmentSlot {
         val id = reader.readS4()
         val prefix = reader.readU1()
 
@@ -259,7 +240,7 @@ class PlayerParser(val content: ByteArray) {
         return MiscEquipmentSlot(Item(id, prefix), Item(dyeId, dyePrefix))
     }
 
-    fun readInventoryItem(reader: BinaryReader): InventoryItem {
+    private fun readInventoryItem(reader: BinaryReader): InventoryItem {
         val id = reader.readS4()
         val stack = reader.readS4()
         val prefix = reader.readU1()
@@ -268,7 +249,7 @@ class PlayerParser(val content: ByteArray) {
         return InventoryItem(Item(id, prefix), stack, favorited)
     }
 
-    fun readBankItem(reader: BinaryReader): BankItem {
+    private fun readBankItem(reader: BinaryReader): BankItem {
         val id = reader.readS4()
         val stack = reader.readS4()
         val prefix = reader.readU1()
@@ -276,19 +257,11 @@ class PlayerParser(val content: ByteArray) {
         return BankItem(Item(id, prefix), stack)
     }
 
-    fun readColor(reader: BinaryReader): Color {
+    private fun readColor(reader: BinaryReader): Color {
         val r = reader.readU1().toInt()
         val g = reader.readU1().toInt()
         val b = reader.readU1().toInt()
 
         return Color(r, g, b)
     }
-}
-
-inline fun <reified T> JsonObjectBuilder.putValue(key: String, value: T) {
-    put(key, Json.encodeToJsonElement(value))
-}
-
-inline fun JsonObjectBuilder.putValue(key: String, block: JsonObjectBuilder.() -> Unit) {
-    put(key, buildJsonObject(block))
 }

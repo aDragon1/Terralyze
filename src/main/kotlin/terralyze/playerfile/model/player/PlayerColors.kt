@@ -1,6 +1,6 @@
-package core.model.player
+package terralyze.playerfile.model.player
 
-import core.model.Color
+import terralyze.playerfile.model.Color
 import kotlinx.serialization.Serializable
 
 @Serializable

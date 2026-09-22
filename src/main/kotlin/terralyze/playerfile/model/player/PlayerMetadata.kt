@@ -1,5 +1,5 @@
-package core.model.player
+package terralyze.playerfile.model.player
 
-import core.model.FileType
+import terralyze.playerfile.model.FileType
 
 data class PlayerMetadata(val type: FileType, val revision: UInt, val isFavorite: Boolean)

@@ -1,4 +1,4 @@
-package core.model
+package terralyze.playerfile.model
 
 import kotlinx.serialization.Serializable
 

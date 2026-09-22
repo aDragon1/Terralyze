@@ -1,6 +1,6 @@
-package core.model.equipment
+package terralyze.playerfile.model.equipment
 
-import core.model.item.Item
+import terralyze.playerfile.model.item.Item
 import kotlinx.serialization.Serializable
 
 @Serializable
