@@ -1,0 +1,67 @@
+{
+  "Weapons": [
+    "Melee Weapons",
+    "Ranged Weapons",
+    "Magic Weapons",
+    "Summon Weapons",
+    "Other Weapons"
+  ],
+  "Tools": [
+    "Pickaxes/Drills",
+    "Axes/Chainsaws",
+    "Hammers",
+    "Wiring",
+    "Painting",
+    "Fishing Poles",
+    "Other Tools"
+  ],
+  "Equipment": [
+    "Armor",
+    "Accessories",
+    "Vanity",
+    "Dyes",
+    "Pets",
+    "Light Pets",
+    "Minecarts",
+    "Mounts",
+    "Hooks"
+  ],
+  "Consumables": [
+    "Ammunition",
+    "Potions",
+    "Explosive Consumables",
+    "Consumable Weapons",
+    "Consumable Tools",
+    "Summoning Items",
+    "Permanent Boosters",
+    "Critters",
+    "Fish",
+    "Grab Bags",
+    "Seeds",
+    "Other"
+  ],
+  "Furniture": [
+    "Crafting Stations",
+    "Light Sources",
+    "Storage Items",
+    "Furniture Sets",
+    "Paintings",
+    "Banners",
+    "Statues",
+    "Music Boxes",
+    "Other"
+  ],
+  "Tiles": [
+    "Blocks",
+    "Walls"
+  ],
+  "Misc": [
+    "Materials",
+    "Drops",
+    "Shimmering",
+    "Novelty Items",
+    "'Drunk' World",
+    "'For the Worthy' World",
+    "Other"
+  ]
+}

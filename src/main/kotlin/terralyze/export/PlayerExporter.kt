@@ -1,6 +1,6 @@
 package terralyze.export
 
-import terralyze.playerfile.model.player.ParsedPlayer
+import terralyze.data.model.player.ParsedPlayer
 
 interface PlayerExporter {
     val fileExtension: String

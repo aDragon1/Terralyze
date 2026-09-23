@@ -1,11 +1,12 @@
 package terralyze.export
 
-import terralyze.playerfile.model.player.ParsedPlayer
+import terralyze.data.model.player.ParsedPlayer
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObjectBuilder
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.encodeToJsonElement
+import terralyze.data.model.ParsedFieldValue
 
 class PlayerJsonExporter(private val json: Json = Json { prettyPrint = true }) : PlayerExporter {
 
@@ -65,6 +66,13 @@ class PlayerJsonExporter(private val json: Json = Json { prettyPrint = true }) :
         putValue("golferScoreAccumulated", parsedPlayer.golferScoreAccumulated)
     }
 
+    private inline fun <reified T> JsonObjectBuilder.putValue(key: String, value: ParsedFieldValue<T>) =
+        when (value) {
+            is ParsedFieldValue.Absent -> {}
+            is ParsedFieldValue.Present -> put(key, Json.encodeToJsonElement(value))
+        }
+
+
     private inline fun <reified T> JsonObjectBuilder.putValue(key: String, value: T) {
         put(key, Json.encodeToJsonElement(value))
     }
@@ -73,4 +81,3 @@ class PlayerJsonExporter(private val json: Json = Json { prettyPrint = true }) :
         put(key, buildJsonObject(block))
     }
 }
-
