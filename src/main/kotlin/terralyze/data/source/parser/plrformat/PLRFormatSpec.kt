@@ -1,4 +1,4 @@
-package terralyze.data.source.plrformat
+package terralyze.data.source.parser.plrformat
 
 data class PLRFormatSpec(
     val version: Int,
@@ -38,7 +38,10 @@ data class PLRFormatSpec(
     val isLastTimePlayerWasSavedAvailable: Boolean,
     val isGolferScoreAccumulatedAvailable: Boolean,
     val isBank4FavoriteAvailable: Boolean,
-    val bank4Size: Int
+    val bank4Size: Int,
+    val shouldSkipBeforeShimmer: Boolean,
+    val shouldSkipBeforeResearches: Boolean,
+    val isResearchAvailable: Boolean
 )
 
 enum class DifficultyFormat {

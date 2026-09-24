@@ -67,12 +67,9 @@ data class ParsedPlayer(
     val lastTimePlayerWasSaved: ParsedFieldValue<Long>,
 
     val golferScoreAccumulated: ParsedFieldValue<Int>,
+    val researchEntries: ParsedFieldValue<List<ResearchEntry>>,
 
-// TODO: Journey mode research data isn't fully read yet (see parser TODO).
-// Keeping this raw count here so parse() can still return *something*
-// for it without pretending the feature is finished.
-    val researchedItems: Int
-) {
+    ) {
     val playtimeDuration: Duration
         get() = when (playtimeTicks) {
             is ParsedFieldValue.Absent -> Duration.ZERO

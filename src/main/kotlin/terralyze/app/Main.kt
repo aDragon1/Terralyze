@@ -13,22 +13,19 @@ import java.io.File
 
 /*
    TODO:
-        0) Handle earlier version?
-        1) Map item tags in ItemInfo to some class or enum, instead of Map<String, List<String>>
-        2) Name magic numbers in parser
-        3) read*() in parser as extension function on BinaryReader?
-        4) ItemEnricher (ParsedPlayer + ItemCatalog, id -> ItemInfo)
+        * Map item tags in ItemInfo to some class or enum, instead of Map<String, List<String>>
+        * read*() in parser as extension function on BinaryReader?
+        * ItemEnricher (ParsedPlayer + ItemCatalog, id -> ItemInfo)
             Unknown item?
-        5) CMP
+        * CMP
  */
 
 
 fun main() {
 
-//    val path = "C:/Users/aDragon/OneDrive/Документы/My Games/Terraria/Players/aDragonJourney.plr"
+    val path = "C:/Users/aDragon/OneDrive/Документы/My Games/Terraria/Players/aDragonJourney.plr"
 //    val path = "C:/Users/aDragon/OneDrive/Документы/My Games/Terraria/Players/aDragon.plr"
-    val path = "C:/Users/aDragon/Downloads/Инжир.plr"
-    val file = File(path)
+//    val path = "C:/Users/aDragon/Downloads/Инжир.plr"
     val bytes = File(path).readBytes()
     val player = PlayerFileLoader(decryptor = JvmPlrDecryptor())
         .load(bytes)

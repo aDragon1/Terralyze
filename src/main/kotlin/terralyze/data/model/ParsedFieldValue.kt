@@ -8,9 +8,7 @@ sealed interface ParsedFieldValue<out T> {
     data object Absent : ParsedFieldValue<Nothing>
 
     @Serializable
-    data class Present<T>(
-        val value: T
-    ) : ParsedFieldValue<T>
+    data class Present<T>(val value: T) : ParsedFieldValue<T>
 }
 
 fun <T> ParsedFieldValue<T>.getOrNull(): T? =

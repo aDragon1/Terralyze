@@ -1,4 +1,4 @@
-package terralyze.data.source.plrformat
+package terralyze.data.source.parser.plrformat
 
 
 object PLRFormat {
@@ -14,7 +14,7 @@ object PLRFormat {
         isHairDyeAvailable = version >= 82,
         isTeamAvailable = version >= 283,
         hideAccessoriesFormat = when {
-            version >= 123 -> HideAccessoriesFormat.TEN_BITS
+            version >= 124 -> HideAccessoriesFormat.TEN_BITS
             version >= 83 -> HideAccessoriesFormat.EIGHT_BITS
             else -> HideAccessoriesFormat.ABSENT
         },
@@ -24,6 +24,7 @@ object PLRFormat {
         isUnlockedBiomeTorchesAvailable = version >= 229,
         isUsingBiomeTorchesAvailable = version >= 229,
         isAteArtisanBreadAvailable = version >= 256,
+        shouldSkipBeforeShimmer = version >= 324,
         isShimmerUpgradesAvailable = version >= 260,
         isDownedDD2EventAnyDifficultyAvailable = version >= 182,
         isTaxMoneyAvailable = version >= 128,
@@ -46,7 +47,7 @@ object PLRFormat {
         isBank4FavoriteAvailable = version >= 255,
         bank4Size = 40,
         isVoidVaultInfoAvailable = version >= 199,
-        isBuffAvailable = version > 11,
+        isBuffAvailable = version >= 11,
         buffSize = when {
             version < 74 -> 10
             version >= 252 -> 44
@@ -60,6 +61,8 @@ object PLRFormat {
         isPlayerDeadAvailable = version >= 200,
         isLastTimePlayerWasSavedAvailable = version >= 202,
         isGolferScoreAccumulatedAvailable = version >= 206,
+        isResearchAvailable = version >=218,
+        shouldSkipBeforeResearches = version >= 282
     )
 }
 

@@ -15,13 +15,15 @@ import terralyze.data.model.player.Buff
 import terralyze.data.model.player.ParsedPlayer
 import terralyze.data.model.player.PlayerColors
 import terralyze.data.model.player.PlayerMetadata
+import terralyze.data.model.player.ResearchEntry
 import terralyze.data.model.player.SP
 import terralyze.data.model.player.ShimmerUpgrades
 import terralyze.data.source.binary.BinaryReader
-import terralyze.data.source.plrformat.DifficultyFormat
-import terralyze.data.source.plrformat.HideAccessoriesFormat
-import terralyze.data.source.plrformat.MiscEquipmentsFormat
-import terralyze.data.source.plrformat.PLRFormat
+import terralyze.data.source.parser.plrformat.DifficultyFormat
+import terralyze.data.source.parser.plrformat.HideAccessoriesFormat
+import terralyze.data.source.parser.plrformat.MiscEquipmentsFormat
+import terralyze.data.source.parser.plrformat.PLRFormat
+import terralyze.data.source.parser.plrformat.PLRFormatSpec
 
 /*
 * Take and readapt source code of the https://terraria-research-tracker.free.nf
@@ -62,7 +64,7 @@ class PlayerParser {
         val usingBiomeTorches = readIfAvailable(spec.isUsingBiomeTorchesAvailable) { reader.readBoolean() }
 
         val ateArtisanBread = readIfAvailable(spec.isAteArtisanBreadAvailable) { reader.readBoolean() }
-        if (version >= 324) reader.skip(1)
+        if (spec.shouldSkipBeforeShimmer) reader.skip(1)
         val shimmerUpgrades = readIfAvailable(spec.isShimmerUpgradesAvailable) {
             ShimmerUpgrades(
                 usedAegisCrystal = reader.readBoolean(),
@@ -138,7 +140,7 @@ class PlayerParser {
         val anglerQuestsFinished = readIfAvailable(spec.isAnglerQuestsFinishedAvailable) { reader.readS4() }
         val dpadRadialBinding = readIfAvailable(spec.isDpadRadialBindingAvailable) { List(4) { reader.readS4() } }
 
-        //
+
         val builderAccStatus = List(12) { reader.readS4() }
         val bartenderQuestLog = readIfAvailable(spec.isBartenderQuestLogAvailable) { reader.readS4() }
 
@@ -148,17 +150,8 @@ class PlayerParser {
         }
 
         val lastTimePlayerWasSaved = readIfAvailable(spec.isLastTimePlayerWasSavedAvailable) { reader.readS8() }
-
         val golferScoreAccumulated = readIfAvailable(spec.isGolferScoreAccumulatedAvailable) { reader.readS4() }
-
-        // researches journey mode goes below
-
-        // TODO: Journey mode is waitin'
-        reader.skip(1)
-        val researchedItems = reader.readS4()
-        println("researchedItems = $researchedItems")
-
-        println("Left to read - ${reader.leftToRead()} bytes")
+        val researchEntries = readIfAvailable(spec.isResearchAvailable) { readResearches(reader, spec) }
 
         return ParsedPlayer(
             version = version,
@@ -205,13 +198,33 @@ class PlayerParser {
             playerRespawnTimer = playerRespawnTimer,
             lastTimePlayerWasSaved = lastTimePlayerWasSaved,
             golferScoreAccumulated = golferScoreAccumulated,
-            researchedItems = researchedItems
+            researchEntries = researchEntries
         )
     }
 
     private fun <T> readIfAvailable(isAvailable: Boolean, read: () -> T): ParsedFieldValue<T> =
         if (isAvailable) ParsedFieldValue.Present(read()) else ParsedFieldValue.Absent
 
+    private fun readResearches(reader: BinaryReader, spec: PLRFormatSpec): List<ResearchEntry> {
+        fun fixItemInternalName(name: String) = when (name) {
+            "EldMelter" -> "ElfMelter";
+            "ThisIsCanonNow" -> "BrasilianSkies";
+            "FoxparksTagEffect" -> "Deprecated6143";
+            else -> name;
+        }
+        if (spec.shouldSkipBeforeResearches) reader.skip(1)
+        val researchedItemsCount = reader.readS4()
+
+        val researchedEntries = mutableListOf<ResearchEntry>()
+        repeat(researchedItemsCount) {
+
+            val itemInternalName = fixItemInternalName(reader.readString())
+            val itemAmount: Int = reader.readS4()
+            researchedEntries.add(ResearchEntry(itemInternalName, itemAmount))
+        }
+
+        return researchedEntries
+    }
 
     private fun readMetadata(reader: BinaryReader): PlayerMetadata {
         val metadataHeader = reader.readU8()
@@ -282,16 +295,14 @@ class PlayerParser {
         return Buff(id, time)
     }
 
-    private fun readMiscEquipments(reader: BinaryReader, format: MiscEquipmentsFormat): List<MiscEquipmentSlot> {
-        return when (format) {
-            MiscEquipmentsFormat.ABSENT -> emptyList()
-            MiscEquipmentsFormat.IGNORE_INDEX_ONE -> List(5) {
-                if (it == 1) MiscEquipmentSlot(Item(-1, 1.toUByte()), Item(-1, 1.toUByte()))
-                else readMiscEquipmentSlot(reader)
-            }
-
-            MiscEquipmentsFormat.NORMAL -> List(5) { readMiscEquipmentSlot(reader) }
+    private fun readMiscEquipments(reader: BinaryReader, format: MiscEquipmentsFormat) = when (format) {
+        MiscEquipmentsFormat.ABSENT -> emptyList()
+        MiscEquipmentsFormat.IGNORE_INDEX_ONE -> List(5) {
+            if (it == 1) MiscEquipmentSlot(Item(-1, 1.toUByte()), Item(-1, 1.toUByte()))
+            else readMiscEquipmentSlot(reader)
         }
+
+        MiscEquipmentsFormat.NORMAL -> List(5) { readMiscEquipmentSlot(reader) }
     }
 
     private fun readEquipmentItem(reader: BinaryReader, favoritedAvailable: Boolean): EquipmentItem {
