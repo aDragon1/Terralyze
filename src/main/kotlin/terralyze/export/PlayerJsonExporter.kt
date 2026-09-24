@@ -3,7 +3,9 @@ package terralyze.export
 import terralyze.data.model.player.ParsedPlayer
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObjectBuilder
+import kotlinx.serialization.json.JsonUnquotedLiteral
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.encodeToJsonElement
 import terralyze.data.model.ParsedFieldValue
@@ -68,7 +70,7 @@ class PlayerJsonExporter(private val json: Json = Json { prettyPrint = true }) :
 
     private inline fun <reified T> JsonObjectBuilder.putValue(key: String, value: ParsedFieldValue<T>) =
         when (value) {
-            is ParsedFieldValue.Absent -> {}
+            is ParsedFieldValue.Absent -> {}//put(key, JsonUnquotedLiteral("ABSENT"))
             is ParsedFieldValue.Present -> put(key, Json.encodeToJsonElement(value))
         }
 

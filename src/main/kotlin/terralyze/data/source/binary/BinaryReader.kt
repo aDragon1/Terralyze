@@ -49,6 +49,7 @@ class BinaryReader(
         return String(buffer.toByteArray())
     }
 
+    @OptIn(ExperimentalStdlibApi::class)
     fun dumpFromHere(shift: Int) {
         val dump = data.slice(cursor..<cursor + shift).toByteArray()
         print("Bytes:")

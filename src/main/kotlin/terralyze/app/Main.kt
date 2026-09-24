@@ -26,7 +26,8 @@ import java.io.File
 fun main() {
 
 //    val path = "C:/Users/aDragon/OneDrive/Документы/My Games/Terraria/Players/aDragonJourney.plr"
-    val path = "C:/Users/aDragon/OneDrive/Документы/My Games/Terraria/Players/aDragon.plr"
+//    val path = "C:/Users/aDragon/OneDrive/Документы/My Games/Terraria/Players/aDragon.plr"
+    val path = "C:/Users/aDragon/Downloads/Инжир.plr"
     val file = File(path)
     val bytes = File(path).readBytes()
     val player = PlayerFileLoader(decryptor = JvmPlrDecryptor())
