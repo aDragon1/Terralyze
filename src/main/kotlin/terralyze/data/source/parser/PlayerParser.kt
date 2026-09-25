@@ -10,14 +10,14 @@ import terralyze.data.model.getOrNull
 import terralyze.data.model.item.BankItem
 import terralyze.data.model.item.EquipmentItem
 import terralyze.data.model.item.InventoryItem
-import terralyze.data.model.item.Item
+import terralyze.data.model.item.RawItem
 import terralyze.data.model.player.Buff
 import terralyze.data.model.player.ParsedPlayer
 import terralyze.data.model.player.PlayerColors
-import terralyze.data.model.player.PlayerMetadata
+import terralyze.data.model.player.FileInfo
 import terralyze.data.model.player.ResearchEntry
 import terralyze.data.model.player.SP
-import terralyze.data.model.player.ShimmerUpgrades
+import terralyze.data.model.player.ShimmerUpgradesUsed
 import terralyze.data.source.binary.BinaryReader
 import terralyze.data.source.parser.plrformat.DifficultyFormat
 import terralyze.data.source.parser.plrformat.HideAccessoriesFormat
@@ -32,12 +32,11 @@ import terralyze.data.source.parser.plrformat.PLRFormatSpec
 class PlayerParser {
     fun parse(content: ByteArray): ParsedPlayer {
         val reader = BinaryReader(content)
-        println("Total bytes to read - ${reader.leftToRead()}")
 
         val version = reader.readS4()
         val spec = PLRFormat.forVersion(version)
 
-        val metadata = readMetadata(reader)
+        val metadata = readMetadata(reader, version)
 
         val name = reader.readString()
         val difficulty = readDifficulty(reader, spec.difficultyFormat)
@@ -65,14 +64,14 @@ class PlayerParser {
 
         val ateArtisanBread = readIfAvailable(spec.isAteArtisanBreadAvailable) { reader.readBoolean() }
         if (spec.shouldSkipBeforeShimmer) reader.skip(1)
-        val shimmerUpgrades = readIfAvailable(spec.isShimmerUpgradesAvailable) {
-            ShimmerUpgrades(
-                usedAegisCrystal = reader.readBoolean(),
-                usedAegisFruit = reader.readBoolean(),
-                usedArcaneCrystal = reader.readBoolean(),
-                usedGalaxyPearl = reader.readBoolean(),
-                usedGummyWorm = reader.readBoolean(),
-                usedAmbrosia = reader.readBoolean()
+        val shimmerUpgradesUsed = readIfAvailable(spec.isShimmerUpgradesAvailable) {
+            ShimmerUpgradesUsed(
+                aegisCrystal = reader.readBoolean(),
+                aegisFruit = reader.readBoolean(),
+                arcaneCrystal = reader.readBoolean(),
+                galaxyPearl = reader.readBoolean(),
+                gummyWorm = reader.readBoolean(),
+                ambrosia = reader.readBoolean()
             )
         }
 
@@ -108,13 +107,7 @@ class PlayerParser {
                     dye[i]
                 )
             },
-            accessories = accessories.mapIndexed { i, item ->
-                EquipmentSlot(
-                    item,
-                    vanityAccessories[i],
-                    dye[i]
-                )
-            },
+            accessories = accessories.mapIndexed { i, item -> EquipmentSlot(item, vanityAccessories[i], dye[i]) },
             misc = readMiscEquipments(reader, spec.miscEquipmentsFormat)
         )
 
@@ -130,7 +123,7 @@ class PlayerParser {
             List(spec.buffSize) { readBuff(reader) }.filter { it.id != 0 }
         }
         val sp = buildList {
-            repeat(200) {
+            repeat(spec.spSize) {
                 val sp = readSP(reader) ?: return@buildList
                 add(sp)
             }
@@ -141,7 +134,7 @@ class PlayerParser {
         val dpadRadialBinding = readIfAvailable(spec.isDpadRadialBindingAvailable) { List(4) { reader.readS4() } }
 
 
-        val builderAccStatus = List(12) { reader.readS4() }
+        val builderAccStatus = List(spec.builderAccStatusSize) { reader.readS4() }
         val bartenderQuestLog = readIfAvailable(spec.isBartenderQuestLogAvailable) { reader.readS4() }
 
         val isPlayerDead = readIfAvailable(spec.isPlayerDeadAvailable) { reader.readBoolean() }
@@ -154,7 +147,6 @@ class PlayerParser {
         val researchEntries = readIfAvailable(spec.isResearchAvailable) { readResearches(reader, spec) }
 
         return ParsedPlayer(
-            version = version,
             metadata = metadata,
             name = name,
             difficulty = difficulty,
@@ -173,7 +165,7 @@ class PlayerParser {
             unlockedBiomeTorches = unlockedBiomeTorches,
             usingBiomeTorches = usingBiomeTorches,
             ateArtisanBread = ateArtisanBread,
-            shimmerUpgrades = shimmerUpgrades,
+            shimmerUpgradesUsed = shimmerUpgradesUsed,
             downedDd2Event = downedDd2Event,
             taxMoney = taxMoney,
             numberOfDeathsPVE = numberOfDeathsPVE,
@@ -207,17 +199,16 @@ class PlayerParser {
 
     private fun readResearches(reader: BinaryReader, spec: PLRFormatSpec): List<ResearchEntry> {
         fun fixItemInternalName(name: String) = when (name) {
-            "EldMelter" -> "ElfMelter";
-            "ThisIsCanonNow" -> "BrasilianSkies";
-            "FoxparksTagEffect" -> "Deprecated6143";
-            else -> name;
+            "EldMelter" -> "ElfMelter"
+            "ThisIsCanonNow" -> "BrasilianSkies"
+            "FoxparksTagEffect" -> "Deprecated6143"
+            else -> name
         }
         if (spec.shouldSkipBeforeResearches) reader.skip(1)
         val researchedItemsCount = reader.readS4()
 
         val researchedEntries = mutableListOf<ResearchEntry>()
         repeat(researchedItemsCount) {
-
             val itemInternalName = fixItemInternalName(reader.readString())
             val itemAmount: Int = reader.readS4()
             researchedEntries.add(ResearchEntry(itemInternalName, itemAmount))
@@ -226,7 +217,8 @@ class PlayerParser {
         return researchedEntries
     }
 
-    private fun readMetadata(reader: BinaryReader): PlayerMetadata {
+    // TOOD: This shouldn't throw an error, create some format in PLRFormat to indicate an error
+    private fun readMetadata(reader: BinaryReader, version: Int): FileInfo {
         val metadataHeader = reader.readU8()
         val signatureMask = 0xFFFFFFFFFFFFFFuL
         val metadataSignature = 27981915666277746uL
@@ -248,7 +240,7 @@ class PlayerParser {
         val revision = reader.readU4()
         val isFavorite = (reader.readU8() and 1uL) == 1uL
 
-        return PlayerMetadata(fileType, revision, isFavorite)
+        return FileInfo(version, fileType, revision, isFavorite)
     }
 
     private fun readDifficulty(
@@ -298,22 +290,22 @@ class PlayerParser {
     private fun readMiscEquipments(reader: BinaryReader, format: MiscEquipmentsFormat) = when (format) {
         MiscEquipmentsFormat.ABSENT -> emptyList()
         MiscEquipmentsFormat.IGNORE_INDEX_ONE -> List(5) {
-            if (it == 1) MiscEquipmentSlot(Item(-1, 1.toUByte()), Item(-1, 1.toUByte()))
+            if (it == 1) MiscEquipmentSlot(RawItem(-1, 1.toUByte()), RawItem(-1, 1.toUByte()))
             else readMiscEquipmentSlot(reader)
         }
 
         MiscEquipmentsFormat.NORMAL -> List(5) { readMiscEquipmentSlot(reader) }
     }
 
-    private fun readEquipmentItem(reader: BinaryReader, favoritedAvailable: Boolean): EquipmentItem {
+    private fun readEquipmentItem(reader: BinaryReader, favoritedAvailable: Boolean): EquipmentItem<RawItem> {
         val id = reader.readS4()
         val prefix = reader.readU1()
-        val favorited = if (favoritedAvailable) reader.readBoolean() else false
+        val favorited = favoritedAvailable && reader.readBoolean()
 
-        return EquipmentItem(Item(id, prefix), favorited)
+        return EquipmentItem(RawItem(id, prefix), favorited)
     }
 
-    private fun readMiscEquipmentSlot(reader: BinaryReader): MiscEquipmentSlot {
+    private fun readMiscEquipmentSlot(reader: BinaryReader): MiscEquipmentSlot<RawItem> {
         val id = reader.readS4()
         val prefix = reader.readU1()
 
@@ -321,26 +313,26 @@ class PlayerParser {
         val dyePrefix = reader.readU1()
 
         return MiscEquipmentSlot(
-            Item(id, prefix),
-            Item(dyeId, dyePrefix)
+            RawItem(id, prefix),
+            RawItem(dyeId, dyePrefix)
         )
     }
 
-    private fun readInventoryItem(reader: BinaryReader, favoritedAvailable: Boolean): InventoryItem {
+    private fun readInventoryItem(reader: BinaryReader, favoritedAvailable: Boolean): InventoryItem<RawItem> {
         val id = reader.readS4()
         val stack = reader.readS4()
         val prefix = reader.readU1()
-        val favorited = if (favoritedAvailable) reader.readBoolean() else false
+        val favorited = favoritedAvailable && reader.readBoolean()
 
-        return InventoryItem(Item(id, prefix), stack, favorited)
+        return InventoryItem(RawItem(id, prefix), stack, favorited)
     }
 
-    private fun readBankItem(reader: BinaryReader): BankItem {
+    private fun readBankItem(reader: BinaryReader): BankItem<RawItem> {
         val id = reader.readS4()
         val stack = reader.readS4()
         val prefix = reader.readU1()
 
-        return BankItem(Item(id, prefix), stack)
+        return BankItem(RawItem(id, prefix), stack)
     }
 
     private fun readColor(reader: BinaryReader): Color {

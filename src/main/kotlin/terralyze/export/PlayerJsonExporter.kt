@@ -13,8 +13,8 @@ class PlayerJsonExporter(private val json: Json = Json { prettyPrint = true }) :
     override fun export(parsedPlayer: ParsedPlayer): String = json.encodeToString(toJson(parsedPlayer))
 
     private fun toJson(parsedPlayer: ParsedPlayer) = buildJsonObject {
-        putValue("version", parsedPlayer.version)
         putValue("metadata") {
+            putValue("version", parsedPlayer.metadata.version)
             putValue("type", parsedPlayer.metadata.type.name)
             putValue("revision", parsedPlayer.metadata.revision)
             putValue("isFavorite", parsedPlayer.metadata.isFavorite)
@@ -23,7 +23,7 @@ class PlayerJsonExporter(private val json: Json = Json { prettyPrint = true }) :
         putValue("difficulty", parsedPlayer.difficulty)
         putValue("playtime") {
             putValue("time", parsedPlayer.playtimeTicks)
-            putValue("duration", parsedPlayer.playtimeDuration.toString())
+//            putValue("duration", parsedPlayer.playtimeDuration.toString())
         }
         putValue("hair", parsedPlayer.hair)
         putValue("hairDye", parsedPlayer.hairDye)
@@ -38,7 +38,7 @@ class PlayerJsonExporter(private val json: Json = Json { prettyPrint = true }) :
         putValue("hasExtraAccessorySlot", parsedPlayer.hasExtraAccessorySlot)
         putValue("unlockedBiomeTorches", parsedPlayer.unlockedBiomeTorches)
         putValue("usingBiomeTorches", parsedPlayer.usingBiomeTorches)
-        putValue("shimmerUpgrades", parsedPlayer.shimmerUpgrades)
+        putValue("shimmerUpgrades", parsedPlayer.shimmerUpgradesUsed)
         putValue("downedDd2Event", parsedPlayer.downedDd2Event)
         putValue("taxMoney", parsedPlayer.taxMoney)
         putValue("numberOfDeathPVE", parsedPlayer.numberOfDeathsPVE)
@@ -66,11 +66,10 @@ class PlayerJsonExporter(private val json: Json = Json { prettyPrint = true }) :
         putValue("researchEntries", parsedPlayer.researchEntries)
     }
 
-    private inline fun <reified T> JsonObjectBuilder.putValue(key: String, value: ParsedFieldValue<T>) =
-        when (value) {
-            is ParsedFieldValue.Absent -> {}//put(key, JsonUnquotedLiteral("ABSENT"))
-            is ParsedFieldValue.Present -> put(key, Json.encodeToJsonElement(value))
-        }
+    private inline fun <reified T> JsonObjectBuilder.putValue(key: String, value: ParsedFieldValue<T>) {
+        if (value is ParsedFieldValue.Present)
+            put(key, Json.encodeToJsonElement(value))
+    }
 
 
     private inline fun <reified T> JsonObjectBuilder.putValue(key: String, value: T) {

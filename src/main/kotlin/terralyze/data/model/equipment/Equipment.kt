@@ -3,8 +3,8 @@ package terralyze.data.model.equipment
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class Equipment(
-    val armor: List<terralyze.data.model.equipment.EquipmentSlot>,
-    val accessories: List<terralyze.data.model.equipment.EquipmentSlot>,
-    val misc: List<terralyze.data.model.equipment.MiscEquipmentSlot>,
+data class Equipment<ItemType>(
+    val armor: List<EquipmentSlot<ItemType>>,
+    val accessories: List<EquipmentSlot<ItemType>>,
+    val misc: List<MiscEquipmentSlot<ItemType>>,
 )

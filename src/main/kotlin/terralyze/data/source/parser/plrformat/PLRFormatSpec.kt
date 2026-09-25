@@ -41,7 +41,9 @@ data class PLRFormatSpec(
     val bank4Size: Int,
     val shouldSkipBeforeShimmer: Boolean,
     val shouldSkipBeforeResearches: Boolean,
-    val isResearchAvailable: Boolean
+    val isResearchAvailable: Boolean,
+    val spSize: Int,
+    val builderAccStatusSize: Int
 )
 
 enum class DifficultyFormat {

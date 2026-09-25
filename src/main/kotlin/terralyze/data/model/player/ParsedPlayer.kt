@@ -4,13 +4,10 @@ import terralyze.data.model.ParsedFieldValue
 import terralyze.data.model.equipment.Equipment
 import terralyze.data.model.item.BankItem
 import terralyze.data.model.item.InventoryItem
-import kotlin.time.Duration
-import kotlin.time.DurationUnit
-import kotlin.time.toDuration
+import terralyze.data.model.item.RawItem
 
 data class ParsedPlayer(
-    val version: Int,
-    val metadata: PlayerMetadata,
+    val metadata: FileInfo,
 
     val name: String,
     val difficulty: ParsedFieldValue<UByte>,
@@ -33,7 +30,7 @@ data class ParsedPlayer(
     val usingBiomeTorches: ParsedFieldValue<Boolean>,
 
     val ateArtisanBread: ParsedFieldValue<Boolean>,
-    val shimmerUpgrades: ParsedFieldValue<ShimmerUpgrades>,
+    val shimmerUpgradesUsed: ParsedFieldValue<ShimmerUpgradesUsed>,
 
     val downedDd2Event: ParsedFieldValue<Boolean>,
     val taxMoney: ParsedFieldValue<Int>,
@@ -42,13 +39,13 @@ data class ParsedPlayer(
     val numberOfDeathsPVP: ParsedFieldValue<Int>,
 
     val colors: PlayerColors,
-    val equipment: Equipment,
-    val inventory: List<InventoryItem>,
+    val equipment: Equipment<RawItem>,
+    val inventory: List<InventoryItem<RawItem>>,
 
-    val piggyBank: List<BankItem>,
-    val safe: List<BankItem>,
-    val defendersForge: ParsedFieldValue<List<BankItem>>,
-    val voidVault: ParsedFieldValue<List<InventoryItem>>,
+    val piggyBank: List<BankItem<RawItem>>,
+    val safe: List<BankItem<RawItem>>,
+    val defendersForge: ParsedFieldValue<List<BankItem<RawItem>>>,
+    val voidVault: ParsedFieldValue<List<InventoryItem<RawItem>>>,
     val voidVaultInfo: ParsedFieldValue<UByte>,
 
     val buffs: ParsedFieldValue<List<Buff>>,
@@ -68,13 +65,4 @@ data class ParsedPlayer(
 
     val golferScoreAccumulated: ParsedFieldValue<Int>,
     val researchEntries: ParsedFieldValue<List<ResearchEntry>>,
-
-    ) {
-    val playtimeDuration: Duration
-        get() = when (playtimeTicks) {
-            is ParsedFieldValue.Absent -> Duration.ZERO
-            is ParsedFieldValue.Present -> {
-                ((playtimeTicks.value) * 100).toDuration(DurationUnit.NANOSECONDS)
-            }
-        }
-}
+    )

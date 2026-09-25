@@ -53,10 +53,12 @@ object PLRFormat {
             version >= 252 -> 44
             else -> 22
         },
+        spSize = 200,
         isHotbarLockedAvailable = version >= 16,
         isHideInfoAvailable = version >= 115,
         isAnglerQuestsFinishedAvailable = version >= 98,
         isDpadRadialBindingAvailable = version >= 162,
+        builderAccStatusSize = 12,
         isBartenderQuestLogAvailable = version >= 181,
         isPlayerDeadAvailable = version >= 200,
         isLastTimePlayerWasSavedAvailable = version >= 202,
