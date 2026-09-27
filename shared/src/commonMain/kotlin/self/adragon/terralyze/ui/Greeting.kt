@@ -1,4 +1,6 @@
-package self.adragon.terralyze
+package self.adragon.terralyze.ui
+
+import self.adragon.terralyze.getPlatform
 
 class Greeting {
     private val platform = getPlatform()
