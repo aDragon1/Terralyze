@@ -6,11 +6,16 @@ import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.encodeToJsonElement
 import self.adragon.terralyze.data.model.ParsedFieldValue
 import self.adragon.terralyze.data.model.player.ParsedPlayer
+import self.adragon.terralyze.domain.model.Player
 
 class PlayerJsonExporter(private val json: Json = Json { prettyPrint = true }) : PlayerExporter {
 
     override val fileExtension: String = "json"
-    override fun exportRawPlayer(parsedPlayer: ParsedPlayer): String = json.encodeToString(toJson(parsedPlayer))
+
+    override fun export(player: Player) = TODO("Not yet implemented")
+
+    override fun exportRawPlayer(parsedPlayer: ParsedPlayer): String =
+        json.encodeToString(toJson(parsedPlayer))
 
     private fun toJson(parsedPlayer: ParsedPlayer) = buildJsonObject {
         putValue("metadata") {
@@ -66,7 +71,10 @@ class PlayerJsonExporter(private val json: Json = Json { prettyPrint = true }) :
         putValue("researchEntries", parsedPlayer.researchEntries)
     }
 
-    private inline fun <reified T> JsonObjectBuilder.putValue(key: String, value: ParsedFieldValue<T>) {
+    private inline fun <reified T> JsonObjectBuilder.putValue(
+        key: String,
+        value: ParsedFieldValue<T>
+    ) {
         if (value is ParsedFieldValue.Present)
             put(key, json.encodeToJsonElement(value))
     }
@@ -76,7 +84,10 @@ class PlayerJsonExporter(private val json: Json = Json { prettyPrint = true }) :
         put(key, json.encodeToJsonElement(value))
     }
 
-    private inline fun JsonObjectBuilder.putValue(key: String, block: JsonObjectBuilder.() -> Unit) {
+    private inline fun JsonObjectBuilder.putValue(
+        key: String,
+        block: JsonObjectBuilder.() -> Unit
+    ) {
         put(key, buildJsonObject(block))
     }
 }
