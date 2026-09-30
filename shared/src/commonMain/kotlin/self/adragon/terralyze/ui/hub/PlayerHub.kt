@@ -45,15 +45,15 @@ Icon(
         {
             when (currentDestination) {
                 HubDestination.Overview -> OverviewScreen(player)
-                HubDestination.Inventory -> Text("Inventory")
-                HubDestination.Equipment -> Text("Equipment")
+                HubDestination.Inventory -> InventoryScreen(player)
+                HubDestination.Researches -> Text("Изучения")
             }
         }
     }
 }
 @Serializable
-enum class HubDestination {
-    Overview,
-    Inventory,
-    Equipment,
+enum class HubDestination() {
+    Overview(),
+    Inventory(),
+    Researches(),
 }
