@@ -1,0 +1,75 @@
+name: Build
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        target:
+          - name: js
+            os: ubuntu-latest
+            task: ":webApp:jsBrowserDistribution"
+            path: "webApp/build/js"
+
+          - name: wasm
+            os: ubuntu-latest
+            task: ":webApp:wasmJsBrowserDistribution"
+            path: "webApp/build/wasmJs"
+
+          - name: android
+            os: ubuntu-latest
+            task: ":androidApp:assembleRelease"
+            path: "androidApp/build/outputs/apk/release"
+
+          - name: desktop-linux
+            os: ubuntu-latest
+            task: ":desktopApp:packageReleaseDistributionForCurrentOS"
+            path: "desktopApp/build/compose"
+
+          - name: desktop-windows
+            os: windows-latest
+            task: ":desktopApp:packageReleaseDistributionForCurrentOS"
+            path: "desktopApp/build/compose"
+
+    runs-on: ${{ matrix.target.os }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup JDK
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v5
+
+      - name: Build ${{ matrix.target.name }}
+        run: ./gradlew ${{ matrix.target.task }} --stacktrace
+
+      - name: Debug - list build output on failure
+        if: failure()
+        shell: bash
+        run: find . -path "*/build/dist/*" -o -path "*/build/compose/*" -o -path "*/build/outputs/*" 2>/dev/null | head -100
+
+      - name: Upload ${{ matrix.target.name }}
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: terralyze-${{ matrix.target.name }}
+          path: ${{ matrix.target.path }}
+          if-no-files-found: error

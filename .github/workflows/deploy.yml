@@ -1,0 +1,90 @@
+name: Deploy Web App
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: github-pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup JDK
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v5
+
+      - name: Build Web App
+        run: ./gradlew :webApp:wasmJsBrowserDistribution --stacktrace
+
+      - name: Prepare Pages bundle
+        shell: bash
+        run: |
+          rm -rf pages
+          mkdir -p pages
+
+          cp -R webApp/build/wasmJs/. pages/
+
+          resource_dir="$(find webApp/build shared/build \
+            -type d \
+            -path '*/composeResources/terralyze.shared.generated.resources' \
+            -exec test -f '{}/files/images/Copper_Coin.png' \; \
+            -print -quit)"
+
+          if [ -z "$resource_dir" ]; then
+            echo "Compose resources directory was not found"
+            find webApp/build shared/build -type d -name composeResources -print
+            exit 1
+          fi
+
+          echo "Using Compose resources from: $resource_dir"
+          mkdir -p pages/composeResources/terralyze.shared.generated.resources
+          cp -R "$resource_dir/." \
+            pages/composeResources/terralyze.shared.generated.resources/
+
+      - name: Verify Web Output
+        shell: bash
+        run: |
+          test -f pages/index.html
+          test -f "pages/composeResources/terralyze.shared.generated.resources/files/images/Copper_Coin.png"
+          test -f "pages/composeResources/terralyze.shared.generated.resources/files/images/Possession.png"
+          find pages -maxdepth 3 -type f | sort | head -100
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload Pages Artifact
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: pages
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
