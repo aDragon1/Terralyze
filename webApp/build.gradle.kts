@@ -1,7 +1,4 @@
-@file:OptIn(ExperimentalDistributionDsl::class)
-
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
-import org.jetbrains.kotlin.gradle.targets.js.dsl.ExperimentalDistributionDsl
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
@@ -11,21 +8,13 @@ plugins {
 
 kotlin {
     js {
-        browser {
-            distribution {
-                outputDirectory.set(project.layout.buildDirectory.dir("js"))
-            }
-        }
+        browser()
         binaries.executable()
     }
 
     @OptIn(ExperimentalWasmDsl::class)
     wasmJs {
-        browser {
-            distribution {
-                outputDirectory.set(project.layout.buildDirectory.dir("wasmJs"))
-            }
-        }
+        browser()
         binaries.executable()
     }
 

@@ -21,12 +21,12 @@ jobs:
           - name: js
             os: ubuntu-latest
             task: ":webApp:jsBrowserDistribution"
-            path: "webApp/build/js"
+            path: "webApp/build/dist/js/productionExecutable"
 
           - name: wasm
             os: ubuntu-latest
             task: ":webApp:wasmJsBrowserDistribution"
-            path: "webApp/build/wasmJs"
+            path: "webApp/build/dist/wasmJs/productionExecutable"
 
           - name: android
             os: ubuntu-latest
