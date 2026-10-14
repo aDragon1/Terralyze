@@ -31,9 +31,6 @@ import terralyze.shared.generated.resources.Res
 
 @Composable
 fun App() {
-
-
-
     var initState by remember { mutableStateOf<InitState>(InitState.Loading) }
 
     LaunchedEffect(Unit) {

@@ -18,7 +18,6 @@ fun AppGraph(loadPlayer: LoadPlayerUseCase) {
     val navController = rememberNavController()
     var player by remember { mutableStateOf<Player?>(null) }
 
-
     NavHost(
         navController = navController,
         startDestination = Routes.Load

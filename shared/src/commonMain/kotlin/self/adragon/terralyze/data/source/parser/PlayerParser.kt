@@ -1,6 +1,6 @@
 package self.adragon.terralyze.data.source.parser
 
-import self.adragon.terralyze.data.model.Color
+import self.adragon.terralyze.data.model.PlayerColor
 import self.adragon.terralyze.data.model.FileType
 import self.adragon.terralyze.data.model.ParsedFieldValue
 import self.adragon.terralyze.data.model.equipment.Equipment
@@ -335,11 +335,11 @@ class PlayerParser {
         return BankItem(RawItem(id, prefix), stack)
     }
 
-    private fun readColor(reader: BinaryReader): Color {
+    private fun readColor(reader: BinaryReader): PlayerColor {
         val r = reader.readU1().toInt()
         val g = reader.readU1().toInt()
         val b = reader.readU1().toInt()
 
-        return Color(r, g, b)
+        return PlayerColor(r, g, b)
     }
 }

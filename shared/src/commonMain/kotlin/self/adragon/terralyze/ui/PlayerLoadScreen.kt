@@ -28,7 +28,7 @@ fun PlayerLoadScreen(
     val scope = rememberCoroutineScope()
 
     val launcher = rememberFilePickerLauncher(
-        type = FileKitType.File(extension = "plr")
+        type = FileKitType.File(extensions = listOf("plr", "bak"))
     ) { file ->
         if (file == null) return@rememberFilePickerLauncher
 
@@ -60,7 +60,7 @@ fun PlayerLoadScreen(
             PlayerLoadState.Loading -> Text("Чтение и обработка файла…")
             is PlayerLoadState.Error -> Text("Ошибка: ${curState.message}")
         }
-        Text("Формат полностью поддерживается, начиная с версии Terraria 1.4.0.1 (Journey's End).\n Все ,что было раньше - поддерживается частично и может выдавать ошибики")
+        Text("Формат полностью поддерживается, начиная с версии Terraria 1.4.0.1 (Journey's End).\n Все, что было раньше - поддерживается частично и может выдавать ошибики")
     }
 }
 
