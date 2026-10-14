@@ -12,7 +12,37 @@ permissions:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: js
+            os: ubuntu-latest
+            task: ":webApp:jsBrowserDistribution"
+            path: "webApp/build/dist/js/productionExecutable"
+
+          - name: wasm
+            os: ubuntu-latest
+            task: ":webApp:wasmJsBrowserDistribution"
+            path: "webApp/build/dist/wasmJs/productionExecutable"
+
+          - name: android
+            os: ubuntu-latest
+            task: ":androidApp:assembleRelease"
+            path: "androidApp/build/outputs/apk/release"
+
+          - name: windows
+            os: windows-latest
+            task: ":desktopApp:packageReleaseDistributionForCurrentOS"
+            path: "desktopApp/build/compose"
+
+          - name: linux
+            os: ubuntu-latest
+            task: ":desktopApp:packageReleaseDistributionForCurrentOS"
+            path: "desktopApp/build/compose"
+
+    runs-on: ${{ matrix.os }}
+
     steps:
       - uses: actions/checkout@v6
 
@@ -23,10 +53,10 @@ jobs:
 
       - uses: gradle/actions/setup-gradle@v5
 
-      - run: >
-          ./gradlew
-          :webApp:jsBrowserDistribution
-          :webApp:wasmJsBrowserDistribution
-          :androidApp:assembleRelease
-          :desktopApp:packageReleaseDistributionForCurrentOS
-          --stacktrace
+      - run: ./gradlew ${{ matrix.task }} --stacktrace
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: terralyze-${{ matrix.name }}
+          path: ${{ matrix.path }}
+          if-no-files-found: error

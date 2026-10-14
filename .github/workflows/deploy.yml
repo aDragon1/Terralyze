@@ -13,7 +13,7 @@ permissions:
 
 concurrency:
   group: github-pages
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   build:
@@ -34,6 +34,13 @@ jobs:
 
       - name: Build Web App
         run: ./gradlew :webApp:wasmJsBrowserDistribution --stacktrace
+
+      - name: Check images in dist
+        run: |
+          echo "images in dist:"
+          find webApp/build/dist/wasmJs/productionExecutable -path "*files/images*" -type f | wc -l
+          echo "images in repo:"
+          git ls-files | grep "files/images/" | wc -l
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
