@@ -7,8 +7,6 @@ import kotlinx.coroutines.withContext
 import terralyze.shared.generated.resources.Res
 import kotlin.coroutines.cancellation.CancellationException
 
-expect fun resourceFileName(url: String): String
-
 object ItemImageCache {
     private val cache = HashMap<String, ImageBitmap>()
 
