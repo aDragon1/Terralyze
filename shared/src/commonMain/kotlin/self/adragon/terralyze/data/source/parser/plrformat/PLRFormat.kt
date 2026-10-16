@@ -1,5 +1,10 @@
 package terralyze.data.source.parser.plrformat
 
+import self.adragon.terralyze.data.source.parser.plrformat.DifficultyFormat
+import self.adragon.terralyze.data.source.parser.plrformat.HideAccessoriesFormat
+import self.adragon.terralyze.data.source.parser.plrformat.MiscEquipmentsFormat
+import self.adragon.terralyze.data.source.parser.plrformat.PLRFormatSpec
+
 
 object PLRFormat {
     fun forVersion(version: Int) = PLRFormatSpec(
@@ -25,7 +30,7 @@ object PLRFormat {
         isUsingBiomeTorchesAvailable = version >= 229,
         isAteArtisanBreadAvailable = version >= 256,
         shouldSkipBeforeShimmer = version >= 324,
-        isShimmerUpgradesAvailable = version >= 260,
+        isShimmerAvaliable = version >= 260,
         isDownedDD2EventAnyDifficultyAvailable = version >= 182,
         isTaxMoneyAvailable = version >= 128,
         isNumberOfDeathsAvailable = version >= 254,
@@ -63,7 +68,7 @@ object PLRFormat {
         isPlayerDeadAvailable = version >= 200,
         isLastTimePlayerWasSavedAvailable = version >= 202,
         isGolferScoreAccumulatedAvailable = version >= 206,
-        isResearchAvailable = version >=218,
+        isResearchAvailable = version >= 218,
         shouldSkipBeforeResearches = version >= 282
     )
 }

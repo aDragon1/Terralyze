@@ -25,12 +25,16 @@ data class ParsedPlayer(
     val mana: Int,
     val maxMana: Int,
 
-    val hasExtraAccessorySlot: ParsedFieldValue<Boolean>,
-    val unlockedBiomeTorches: ParsedFieldValue<Boolean>,
+    val extraAccessorySlot: ParsedFieldValue<Boolean>,
+    val biomeTorches: ParsedFieldValue<Boolean>,
     val usingBiomeTorches: ParsedFieldValue<Boolean>,
-
-    val ateArtisanBread: ParsedFieldValue<Boolean>,
-    val shimmerUpgradesUsed: ParsedFieldValue<ShimmerUpgradesUsed>,
+    val artisanLoaf: ParsedFieldValue<Boolean>,
+    val aegisCrystall: ParsedFieldValue<Boolean>,
+    val aegisFruit: ParsedFieldValue<Boolean>,
+    val arcaneCrystal: ParsedFieldValue<Boolean>,
+    val galaxyPearl: ParsedFieldValue<Boolean>,
+    val gummyWorm: ParsedFieldValue<Boolean>,
+    val ambrosia: ParsedFieldValue<Boolean>,
 
     val downedDd2Event: ParsedFieldValue<Boolean>,
     val taxMoney: ParsedFieldValue<Int>,
@@ -65,4 +69,4 @@ data class ParsedPlayer(
 
     val golferScoreAccumulated: ParsedFieldValue<Int>,
     val researchEntries: ParsedFieldValue<List<ResearchEntry>>,
-    )
+)

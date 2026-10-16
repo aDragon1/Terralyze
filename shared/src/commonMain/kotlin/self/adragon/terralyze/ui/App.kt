@@ -29,6 +29,10 @@ import terralyze.shared.generated.resources.Res
         * Добавить некую логику вызова этого экспортера. Мб добавить экспорт в другие форматы
  */
 
+/*
+    TODO: Запустить .py-скрипт в ./shared/commonMain/composeResources при изменении файлов
+ */
+
 @Composable
 fun App() {
     var initState by remember { mutableStateOf<InitState>(InitState.Loading) }

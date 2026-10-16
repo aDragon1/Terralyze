@@ -11,17 +11,10 @@ plugins {
 
 kotlin {
     jvm()
-
-    js {
-        browser()
-        binaries.executable()
-    }
+    js { browser() }
 
     @OptIn(ExperimentalWasmDsl::class)
-    wasmJs {
-        browser()
-        binaries.executable()
-    }
+    wasmJs { browser() }
 
     android {
         namespace = "self.adragon.terralyze.shared"

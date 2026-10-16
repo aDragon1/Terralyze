@@ -1,5 +1,6 @@
 package self.adragon.terralyze.ui.hub.inventory
 
+import self.adragon.terralyze.data.model.equipment.EquipmentSlot
 import self.adragon.terralyze.data.model.item.InventoryItem
 import self.adragon.terralyze.domain.model.ItemSlot
 

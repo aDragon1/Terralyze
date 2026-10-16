@@ -17,13 +17,12 @@ import self.adragon.terralyze.data.model.player.PlayerColors
 import self.adragon.terralyze.data.model.player.FileInfo
 import self.adragon.terralyze.data.model.player.ResearchEntry
 import self.adragon.terralyze.data.model.player.SP
-import self.adragon.terralyze.data.model.player.ShimmerUpgradesUsed
 import self.adragon.terralyze.data.source.binary.BinaryReader
-import terralyze.data.source.parser.plrformat.DifficultyFormat
-import terralyze.data.source.parser.plrformat.HideAccessoriesFormat
-import terralyze.data.source.parser.plrformat.MiscEquipmentsFormat
+import self.adragon.terralyze.data.source.parser.plrformat.DifficultyFormat
+import self.adragon.terralyze.data.source.parser.plrformat.HideAccessoriesFormat
+import self.adragon.terralyze.data.source.parser.plrformat.MiscEquipmentsFormat
 import terralyze.data.source.parser.plrformat.PLRFormat
-import terralyze.data.source.parser.plrformat.PLRFormatSpec
+import self.adragon.terralyze.data.source.parser.plrformat.PLRFormatSpec
 
 /*
 * Take and readapt source code of the https://terraria-research-tracker.free.nf
@@ -57,25 +56,27 @@ class PlayerParser {
         val mana = reader.readS4()
         val maxMana = reader.readS4()
 
-        val hasExtraAccessorySlot = readIfAvailable(spec.isExtraAccessoryAvailable) { reader.readBoolean() }
+        val hasExtraAccessorySlot =
+            readIfAvailable(spec.isExtraAccessoryAvailable) { reader.readBoolean() }
 
-        val unlockedBiomeTorches = readIfAvailable(spec.isUnlockedBiomeTorchesAvailable) { reader.readBoolean() }
-        val usingBiomeTorches = readIfAvailable(spec.isUsingBiomeTorchesAvailable) { reader.readBoolean() }
+        val unlockedBiomeTorches =
+            readIfAvailable(spec.isUnlockedBiomeTorchesAvailable) { reader.readBoolean() }
+        val usingBiomeTorches =
+            readIfAvailable(spec.isUsingBiomeTorchesAvailable) { reader.readBoolean() }
 
-        val ateArtisanBread = readIfAvailable(spec.isAteArtisanBreadAvailable) { reader.readBoolean() }
+        val ateArtisanBread =
+            readIfAvailable(spec.isAteArtisanBreadAvailable) { reader.readBoolean() }
         if (spec.shouldSkipBeforeShimmer) reader.skip(1)
-        val shimmerUpgradesUsed = readIfAvailable(spec.isShimmerUpgradesAvailable) {
-            ShimmerUpgradesUsed(
-                aegisCrystal = reader.readBoolean(),
-                aegisFruit = reader.readBoolean(),
-                arcaneCrystal = reader.readBoolean(),
-                galaxyPearl = reader.readBoolean(),
-                gummyWorm = reader.readBoolean(),
-                ambrosia = reader.readBoolean()
-            )
-        }
 
-        val downedDd2Event = readIfAvailable(spec.isDownedDD2EventAnyDifficultyAvailable) { reader.readBoolean() }
+        val vitalCrystal = readIfAvailable(spec.isShimmerAvaliable) { reader.readBoolean() }
+        val aegisFruit = readIfAvailable(spec.isShimmerAvaliable) { reader.readBoolean() }
+        val arcaneCrystal = readIfAvailable(spec.isShimmerAvaliable) { reader.readBoolean() }
+        val galaxyPearl = readIfAvailable(spec.isShimmerAvaliable) { reader.readBoolean() }
+        val gummyWorm = readIfAvailable(spec.isShimmerAvaliable) { reader.readBoolean() }
+        val ambrosia = readIfAvailable(spec.isShimmerAvaliable) { reader.readBoolean() }
+
+        val downedDd2Event =
+            readIfAvailable(spec.isDownedDD2EventAnyDifficultyAvailable) { reader.readBoolean() }
         val taxMoney = readIfAvailable(spec.isTaxMoneyAvailable) { reader.readS4() }
 
         val numberOfDeathsPVE = readIfAvailable(spec.isNumberOfDeathsAvailable) { reader.readS4() }
@@ -91,13 +92,22 @@ class PlayerParser {
             readColor(reader),
         )
 
-        val armor = List(spec.armorSize) { readEquipmentItem(reader, spec.isArmorFavoritedAvailable) }
-        val accessories = List(spec.accessoriesSize) { readEquipmentItem(reader, spec.isArmorFavoritedAvailable) }
-        val vanityArmor = List(spec.armorSize) { readEquipmentItem(reader, spec.isArmorFavoritedAvailable) }
-        val vanityAccessories = List(spec.accessoriesSize) { readEquipmentItem(reader, spec.isArmorFavoritedAvailable) }
+        val armor =
+            List(spec.armorSize) { readEquipmentItem(reader, spec.isArmorFavoritedAvailable) }
+        val accessories =
+            List(spec.accessoriesSize) { readEquipmentItem(reader, spec.isArmorFavoritedAvailable) }
+        val vanityArmor =
+            List(spec.armorSize) { readEquipmentItem(reader, spec.isArmorFavoritedAvailable) }
+        val vanityAccessories =
+            List(spec.accessoriesSize) { readEquipmentItem(reader, spec.isArmorFavoritedAvailable) }
         val dye = List(spec.dyeSize) { readEquipmentItem(reader, spec.isArmorFavoritedAvailable) }
 
-        val inventory = List(spec.inventorySize) { readInventoryItem(reader, spec.isInventoryFavoritedAvailable) }
+        val inventory = List(spec.inventorySize) {
+            readInventoryItem(
+                reader,
+                spec.isInventoryFavoritedAvailable
+            )
+        }
 
         val equipment = Equipment(
             armor = armor.mapIndexed { i, item ->
@@ -107,13 +117,20 @@ class PlayerParser {
                     dye[i]
                 )
             },
-            accessories = accessories.mapIndexed { i, item -> EquipmentSlot(item, vanityAccessories[i], dye[i]) },
+            accessories = accessories.mapIndexed { i, item ->
+                EquipmentSlot(
+                    item,
+                    vanityAccessories[i],
+                    dye[i]
+                )
+            },
             misc = readMiscEquipments(reader, spec.miscEquipmentsFormat)
         )
 
         val piggyBank = List(spec.bankSize) { readBankItem(reader) }
         val safe = List(spec.bankSize) { readBankItem(reader) }
-        val defendersForge = readIfAvailable(spec.isBank3Available) { List(spec.bankSize) { readBankItem(reader) } }
+        val defendersForge =
+            readIfAvailable(spec.isBank3Available) { List(spec.bankSize) { readBankItem(reader) } }
         val voidVault = readIfAvailable(spec.isBank4Available) {
             List(spec.bank4Size) { readInventoryItem(reader, spec.isBank4FavoriteAvailable) }
         }
@@ -129,22 +146,28 @@ class PlayerParser {
             }
         }
         val hotbarLocked = readIfAvailable(spec.isHotbarLockedAvailable) { reader.readBoolean() }
-        val hideInfo = readIfAvailable(spec.isHideInfoAvailable) { List(13) { reader.readBoolean() } }
-        val anglerQuestsFinished = readIfAvailable(spec.isAnglerQuestsFinishedAvailable) { reader.readS4() }
-        val dpadRadialBinding = readIfAvailable(spec.isDpadRadialBindingAvailable) { List(4) { reader.readS4() } }
-
+        val hideInfo =
+            readIfAvailable(spec.isHideInfoAvailable) { List(13) { reader.readBoolean() } }
+        val anglerQuestsFinished =
+            readIfAvailable(spec.isAnglerQuestsFinishedAvailable) { reader.readS4() }
+        val dpadRadialBinding =
+            readIfAvailable(spec.isDpadRadialBindingAvailable) { List(4) { reader.readS4() } }
 
         val builderAccStatus = List(spec.builderAccStatusSize) { reader.readS4() }
-        val bartenderQuestLog = readIfAvailable(spec.isBartenderQuestLogAvailable) { reader.readS4() }
+        val bartenderQuestLog =
+            readIfAvailable(spec.isBartenderQuestLogAvailable) { reader.readS4() }
 
         val isPlayerDead = readIfAvailable(spec.isPlayerDeadAvailable) { reader.readBoolean() }
         val playerRespawnTimer = readIfAvailable(spec.isPlayerDeadAvailable) {
             if (isPlayerDead.getOrNull()!!) reader.readS4() else -1
         }
 
-        val lastTimePlayerWasSaved = readIfAvailable(spec.isLastTimePlayerWasSavedAvailable) { reader.readS8() }
-        val golferScoreAccumulated = readIfAvailable(spec.isGolferScoreAccumulatedAvailable) { reader.readS4() }
-        val researchEntries = readIfAvailable(spec.isResearchAvailable) { readResearches(reader, spec) }
+        val lastTimePlayerWasSaved =
+            readIfAvailable(spec.isLastTimePlayerWasSavedAvailable) { reader.readS8() }
+        val golferScoreAccumulated =
+            readIfAvailable(spec.isGolferScoreAccumulatedAvailable) { reader.readS4() }
+        val researchEntries =
+            readIfAvailable(spec.isResearchAvailable) { readResearches(reader, spec) }
 
         return ParsedPlayer(
             metadata = metadata,
@@ -161,11 +184,16 @@ class PlayerParser {
             maxLife = maxLife,
             mana = mana,
             maxMana = maxMana,
-            hasExtraAccessorySlot = hasExtraAccessorySlot,
-            unlockedBiomeTorches = unlockedBiomeTorches,
+            extraAccessorySlot = hasExtraAccessorySlot,
+            biomeTorches = unlockedBiomeTorches,
             usingBiomeTorches = usingBiomeTorches,
-            ateArtisanBread = ateArtisanBread,
-            shimmerUpgradesUsed = shimmerUpgradesUsed,
+            artisanLoaf = ateArtisanBread,
+            aegisCrystall = vitalCrystal,
+            aegisFruit = aegisFruit,
+            arcaneCrystal = arcaneCrystal,
+            galaxyPearl = galaxyPearl,
+            gummyWorm = gummyWorm,
+            ambrosia = ambrosia,
             downedDd2Event = downedDd2Event,
             taxMoney = taxMoney,
             numberOfDeathsPVE = numberOfDeathsPVE,
@@ -263,11 +291,15 @@ class PlayerParser {
         }
     }
 
-    private fun readHideAccessories(reader: BinaryReader, format: HideAccessoriesFormat) = when (format) {
-        HideAccessoriesFormat.ABSENT -> ParsedFieldValue.Absent
-        HideAccessoriesFormat.EIGHT_BITS -> ParsedFieldValue.Present(reader.readBitsAndReset(8).map { it == 1 })
-        HideAccessoriesFormat.TEN_BITS -> ParsedFieldValue.Present(reader.readBitsAndReset(10).map { it == 1 })
-    }
+    private fun readHideAccessories(reader: BinaryReader, format: HideAccessoriesFormat) =
+        when (format) {
+            HideAccessoriesFormat.ABSENT -> ParsedFieldValue.Absent
+            HideAccessoriesFormat.EIGHT_BITS -> ParsedFieldValue.Present(
+                reader.readBitsAndReset(8).map { it == 1 })
+
+            HideAccessoriesFormat.TEN_BITS -> ParsedFieldValue.Present(
+                reader.readBitsAndReset(10).map { it == 1 })
+        }
 
     private fun readSP(reader: BinaryReader): SP? {
         val x = reader.readS4()
@@ -287,17 +319,21 @@ class PlayerParser {
         return Buff(id, time)
     }
 
-    private fun readMiscEquipments(reader: BinaryReader, format: MiscEquipmentsFormat) = when (format) {
-        MiscEquipmentsFormat.ABSENT -> emptyList()
-        MiscEquipmentsFormat.IGNORE_INDEX_ONE -> List(5) {
-            if (it == 1) MiscEquipmentSlot(RawItem(-1, 1.toUByte()), RawItem(-1, 1.toUByte()))
-            else readMiscEquipmentSlot(reader)
+    private fun readMiscEquipments(reader: BinaryReader, format: MiscEquipmentsFormat) =
+        when (format) {
+            MiscEquipmentsFormat.ABSENT -> emptyList()
+            MiscEquipmentsFormat.IGNORE_INDEX_ONE -> List(5) {
+                if (it == 1) MiscEquipmentSlot(RawItem(-1, 1.toUByte()), RawItem(-1, 1.toUByte()))
+                else readMiscEquipmentSlot(reader)
+            }
+
+            MiscEquipmentsFormat.NORMAL -> List(5) { readMiscEquipmentSlot(reader) }
         }
 
-        MiscEquipmentsFormat.NORMAL -> List(5) { readMiscEquipmentSlot(reader) }
-    }
-
-    private fun readEquipmentItem(reader: BinaryReader, favoritedAvailable: Boolean): EquipmentItem<RawItem> {
+    private fun readEquipmentItem(
+        reader: BinaryReader,
+        favoritedAvailable: Boolean
+    ): EquipmentItem<RawItem> {
         val id = reader.readS4()
         val prefix = reader.readU1()
         val favorited = favoritedAvailable && reader.readBoolean()
@@ -318,7 +354,10 @@ class PlayerParser {
         )
     }
 
-    private fun readInventoryItem(reader: BinaryReader, favoritedAvailable: Boolean): InventoryItem<RawItem> {
+    private fun readInventoryItem(
+        reader: BinaryReader,
+        favoritedAvailable: Boolean
+    ): InventoryItem<RawItem> {
         val id = reader.readS4()
         val stack = reader.readS4()
         val prefix = reader.readU1()

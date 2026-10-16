@@ -36,7 +36,7 @@ fun AppGraph(loadPlayer: LoadPlayerUseCase) {
 }
 
 @Serializable
-sealed interface Routes {
+private  sealed interface Routes {
     @Serializable
     data object Load : Routes
 

@@ -1,4 +1,4 @@
-package terralyze.data.source.parser.plrformat
+package self.adragon.terralyze.data.source.parser.plrformat
 
 data class PLRFormatSpec(
     val version: Int,
@@ -12,7 +12,7 @@ data class PLRFormatSpec(
     val isUnlockedBiomeTorchesAvailable: Boolean,
     val isUsingBiomeTorchesAvailable: Boolean,
     val isAteArtisanBreadAvailable: Boolean,
-    val isShimmerUpgradesAvailable: Boolean,
+    val isShimmerAvaliable: Boolean,
     val isDownedDD2EventAnyDifficultyAvailable: Boolean,
     val isTaxMoneyAvailable: Boolean,
     val isNumberOfDeathsAvailable: Boolean,

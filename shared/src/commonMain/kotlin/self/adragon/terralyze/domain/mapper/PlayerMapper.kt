@@ -1,6 +1,7 @@
 package self.adragon.terralyze.domain.mapper
 
 import self.adragon.terralyze.data.model.ItemInfo
+import self.adragon.terralyze.data.model.ParsedFieldValue
 import self.adragon.terralyze.data.model.equipment.Equipment
 import self.adragon.terralyze.data.model.equipment.EquipmentSlot
 import self.adragon.terralyze.data.model.equipment.MiscEquipmentSlot
@@ -15,6 +16,7 @@ import self.adragon.terralyze.data.repository.ItemCatalog
 import self.adragon.terralyze.domain.model.Difficulty
 import self.adragon.terralyze.domain.model.Item
 import self.adragon.terralyze.domain.model.ItemSlot
+import self.adragon.terralyze.domain.model.PermanentUpgrade
 import self.adragon.terralyze.domain.model.Player
 import self.adragon.terralyze.domain.model.PlayerAppearance
 import self.adragon.terralyze.domain.model.PlayerProgress
@@ -34,7 +36,7 @@ class PlayerMapper {
             appearance = mapAppearance(parsed),
             playerStats = mapPlayerStats(parsed),
             team = parsed.team.getOrNull()?.toInt(),
-            progress = mapProgress(parsed),
+            progress = mapProgress(catalog, parsed),
             taxMoney = parsed.taxMoney.getOrNull(),
             equipment = mapEquipment(catalog, parsed.equipment),
             inventory = mapInventory(catalog, parsed.inventory),
@@ -121,7 +123,10 @@ class PlayerMapper {
     private fun mapInventory(catalog: ItemCatalog, inventory: List<InventoryItem<RawItem>>) =
         inventory.map { mapInventoryItem(catalog, it) }
 
-    private fun mapEquipment(catalog: ItemCatalog, rawEquipment: Equipment<RawItem>): Equipment<ItemSlot> {
+    private fun mapEquipment(
+        catalog: ItemCatalog,
+        rawEquipment: Equipment<RawItem>
+    ): Equipment<ItemSlot> {
         fun mapEquipmentItem(rawEquipmentItem: EquipmentItem<RawItem>) = EquipmentItem(
             resolveItemById(catalog, rawEquipmentItem.item),
             rawEquipmentItem.favorited
@@ -149,16 +154,63 @@ class PlayerMapper {
         return Equipment(armor, accessories, misc)
     }
 
-    private fun mapProgress(parsed: ParsedPlayer) = PlayerProgress(
-        hasExtraAccessorySlot = parsed.hasExtraAccessorySlot.getOrNull(),
-        unlockedBiomeTorches = parsed.unlockedBiomeTorches.getOrNull(),
-        downedDd2Event = parsed.downedDd2Event.getOrNull(),
-        ateArtisanBread = parsed.ateArtisanBread.getOrNull(),
-        shimmerUpgradesUsed = parsed.shimmerUpgradesUsed.getOrNull(),
-        numberOfAnglerQuestsFinished = parsed.anglerQuestsFinished.getOrNull(),
-        golferScoreAccumulated = parsed.golferScoreAccumulated.getOrNull(),
-        bartenderQuestLog = parsed.bartenderQuestLog.getOrNull()
-    )
+    private fun mapProgress(catalog: ItemCatalog, parsed: ParsedPlayer): PlayerProgress {
+        fun mapPermUpgrade(
+            internalName: String,
+            effect: String,
+            value: ParsedFieldValue<Boolean>
+        ): PermanentUpgrade {
+            val item = catalog.getItemByInternalName(internalName)!!
+            return PermanentUpgrade(item.name, item.imageUrl, effect, value.getOrNull())
+        }
+
+        val nameValuesWithDescription = listOf(
+            Triple(
+                "TorchGodsFavor",
+                "Adds a toggle-able button beside the character's inventory that causes torches to change depending on the biome.",
+                parsed.biomeTorches
+            ),
+            Triple(
+                "ArtisanLoaf",
+                "Increases the range that the player can access crafting stations by 4 tiles in all directions.",
+                parsed.artisanLoaf
+            ),
+            Triple(
+                "AegisCrystal",
+                "Increases the character's health regeneration by 20%.",
+                parsed.aegisCrystall
+            ),
+            Triple(
+                "ArcaneCrystal",
+                "Increases the character's mana regeneration by reducing the cooldown between using mana and restoring mana by 5%.",
+                parsed.arcaneCrystal
+            ),
+            Triple(
+                "Ambrosia",
+                "Increases the character's mining, tile, and wall placement speed by 5%.",
+                parsed.ambrosia
+            ),
+            Triple("GummyWorm", "Increases the character's Fishing Power by 3.", parsed.gummyWorm),
+            Triple("GalaxyPearl", "Increases the character's luck by 0.03.", parsed.galaxyPearl),
+            Triple(
+                "DemonHeart",
+                "Increases the character's maximum accessory slots by 1. Can only be attained in Expert Mode and Master Mode worlds, and its effect is disabled upon entering a Classic Mode world.",
+                parsed.extraAccessorySlot
+            ),
+            Triple("AegisFruit", "Increases the character's defense by 4.", parsed.aegisFruit),
+        )
+
+        return PlayerProgress(
+            // TODO: very hackish way to do it, but IDK, tbh
+            permanentUpgrades = nameValuesWithDescription.map {
+                mapPermUpgrade(it.first, it.second, it.third)
+            },
+            downedDd2Event = parsed.downedDd2Event.getOrNull(),
+            numberOfAnglerQuestsFinished = parsed.anglerQuestsFinished.getOrNull(),
+            golferScoreAccumulated = parsed.golferScoreAccumulated.getOrNull(),
+            bartenderQuestLog = parsed.bartenderQuestLog.getOrNull()
+        )
+    }
 
     private fun mapPlayerStats(parsed: ParsedPlayer) = PlayerStats(
         life = parsed.life,

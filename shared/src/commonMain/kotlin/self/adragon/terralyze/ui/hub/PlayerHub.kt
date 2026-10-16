@@ -1,6 +1,7 @@
 package self.adragon.terralyze.ui.hub
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -19,13 +20,6 @@ import self.adragon.terralyze.domain.model.Player
 fun PlayerHub(player: Player) {
     var currentDestination by rememberSaveable { mutableStateOf(HubDestination.Overview) }
 
-    /* Compose logo:
-Icon(
-    painter = painterResource(Res.drawable.compose_multiplatform),
-    contentDescription = "Compose multiplatform logo"
-)
-     */
-
     Scaffold(
         bottomBar = {
             NavigationBar {
@@ -41,8 +35,7 @@ Icon(
         }
 
     ) { pad ->
-        Box(modifier = Modifier.padding(pad))
-        {
+        Box(Modifier.padding(pad).fillMaxSize()) {
             when (currentDestination) {
                 HubDestination.Overview -> OverviewScreen(player)
                 HubDestination.Inventory -> InventoryScreen(player)
@@ -51,9 +44,10 @@ Icon(
         }
     }
 }
+
 @Serializable
-enum class HubDestination() {
-    Overview(),
-    Inventory(),
-    Researches(),
+enum class HubDestination {
+    Overview,
+    Inventory,
+    Researches,
 }
