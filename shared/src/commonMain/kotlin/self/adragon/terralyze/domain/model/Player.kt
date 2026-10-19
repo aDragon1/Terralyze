@@ -8,8 +8,9 @@ import self.adragon.terralyze.data.model.player.SP
 import kotlin.time.Duration
 
 /*
-    If field is Null that means what field is absent in that specific file version
-    Handle it properly on UI
+    TODO:
+        If field is Null that means what field is absent in that specific file version
+            Handle it properly on UI
  */
 data class Player(
     val metadata: FileInfo,

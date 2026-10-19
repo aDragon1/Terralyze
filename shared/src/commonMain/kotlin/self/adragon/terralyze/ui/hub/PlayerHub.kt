@@ -15,6 +15,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import kotlinx.serialization.Serializable
 import self.adragon.terralyze.domain.model.Player
+import self.adragon.terralyze.ui.hub.storage.StorageScreen
 
 @Composable
 fun PlayerHub(player: Player) {
@@ -33,12 +34,11 @@ fun PlayerHub(player: Player) {
                 }
             }
         }
-
     ) { pad ->
         Box(Modifier.padding(pad).fillMaxSize()) {
             when (currentDestination) {
                 HubDestination.Overview -> OverviewScreen(player)
-                HubDestination.Inventory -> InventoryScreen(player)
+                HubDestination.Storage -> StorageScreen(player)
                 HubDestination.Researches -> Text("Изучения")
             }
         }
@@ -46,8 +46,4 @@ fun PlayerHub(player: Player) {
 }
 
 @Serializable
-enum class HubDestination {
-    Overview,
-    Inventory,
-    Researches,
-}
+enum class HubDestination { Overview, Storage, Researches, }
