@@ -21,7 +21,7 @@ import self.adragon.terralyze.data.source.binary.BinaryReader
 import self.adragon.terralyze.data.source.parser.plrformat.DifficultyFormat
 import self.adragon.terralyze.data.source.parser.plrformat.HideAccessoriesFormat
 import self.adragon.terralyze.data.source.parser.plrformat.MiscEquipmentsFormat
-import terralyze.data.source.parser.plrformat.PLRFormat
+import self.adragon.terralyze.data.source.parser.plrformat.PLRFormat
 import self.adragon.terralyze.data.source.parser.plrformat.PLRFormatSpec
 
 /*

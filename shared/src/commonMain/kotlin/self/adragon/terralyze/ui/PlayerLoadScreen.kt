@@ -20,10 +20,7 @@ import self.adragon.terralyze.domain.usecase.LoadPlayerUseCase
 
 
 @Composable
-fun PlayerLoadScreen(
-    loadPlayer: LoadPlayerUseCase,
-    onLoadComplete: (Player) -> Unit,
-) {
+fun PlayerLoadScreen(loadPlayer: LoadPlayerUseCase, onLoadComplete: (Player) -> Unit) {
     var state by remember { mutableStateOf<PlayerLoadState>(PlayerLoadState.Empty) }
     val scope = rememberCoroutineScope()
 

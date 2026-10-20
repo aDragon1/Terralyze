@@ -1,5 +1,6 @@
 package self.adragon.terralyze.ui.common
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.hoverable
@@ -15,13 +16,28 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import self.adragon.terralyze.domain.model.Item
-import self.adragon.terralyze.ui.hub.storage.inventory.ItemUiState
+import self.adragon.terralyze.ui.hub.ItemImageCache
+import self.adragon.terralyze.ui.hub.storage.ItemUiState
+
+@Composable
+fun ItemImage(name: String, url: String, modifier: Modifier = Modifier) {
+    var image by remember(url) { mutableStateOf(ItemImageCache.peek(url)) }
+    LaunchedEffect(url) {
+        if (image == null) image = ItemImageCache.load(url)
+    }
+
+    image?.let { Image(it, name, modifier) }
+}
 
 @Composable
 fun SlotGrid(
@@ -59,9 +75,7 @@ fun ItemOverview(
 ) = ItemSlotFrame(slotGap, slotSize) {
     when (itemState) {
         ItemUiState.Empty -> Unit
-        is ItemUiState.Unknown ->
-            UnknownItem(itemState.id, Modifier.align(Alignment.BottomEnd))
-
+        is ItemUiState.Unknown -> UnknownItem(itemState.id, Modifier.align(Alignment.BottomEnd))
         is ItemUiState.Filled -> FilledItem(itemState, onClick)
     }
 }
@@ -71,10 +85,7 @@ fun UnknownItem(id: Int, modifier: Modifier = Modifier) =
     CaptionText(id.toString(), modifier.padding(2.dp))
 
 @Composable
-fun FilledItem(
-    itemState: ItemUiState.Filled,
-    onClick: () -> Unit
-) {
+fun FilledItem(itemState: ItemUiState.Filled, onClick: () -> Unit) {
     val name = itemState.item.name
     val id = itemState.item.id
     val stack = itemState.stack

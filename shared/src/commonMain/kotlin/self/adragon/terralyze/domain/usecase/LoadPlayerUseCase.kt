@@ -8,13 +8,9 @@ import self.adragon.terralyze.data.source.parser.PlayerParser
 import self.adragon.terralyze.domain.mapper.PlayerMapper
 import self.adragon.terralyze.domain.model.Player
 
-
-// TODO: Сделать проверку на .endsWith(".plr")
 class LoadPlayerUseCase(
-    private val decryptor: PlrDecryptor,
-    private val parser: PlayerParser,
-    private val mapper: PlayerMapper,
-    private val catalog: ItemCatalog,
+    val decryptor: PlrDecryptor, val parser: PlayerParser,
+    val mapper: PlayerMapper, val catalog: ItemCatalog,
 ) {
     suspend operator fun invoke(bytes: ByteArray): Player =
         withContext(Dispatchers.Default) {

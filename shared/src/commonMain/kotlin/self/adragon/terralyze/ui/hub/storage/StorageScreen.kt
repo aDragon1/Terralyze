@@ -28,10 +28,6 @@ import self.adragon.terralyze.domain.model.Player
 import self.adragon.terralyze.ui.common.DropDown
 import self.adragon.terralyze.ui.common.SectionTitle
 import self.adragon.terralyze.ui.common.SlotGrid
-import self.adragon.terralyze.ui.hub.storage.inventory.EquipmentSlotUiState
-import self.adragon.terralyze.ui.hub.storage.inventory.EquipmentUiState
-import self.adragon.terralyze.ui.hub.storage.inventory.ItemUiState
-import self.adragon.terralyze.ui.hub.storage.inventory.toUiState
 
 private const val COLUMNS = 10
 private const val HOTBAR_SIZE = 10
@@ -103,9 +99,7 @@ fun StorageScreen(player: Player, modifier: Modifier = Modifier) {
                     }
 
                 StorageDestination.PIGGY_BANK -> BankScreen(piggyBankState, "Piggy bank", slotSize)
-
                 StorageDestination.SAFE -> BankScreen(safeState, "Safe", slotSize)
-
                 StorageDestination.DEFENDERS_FORGE ->
                     defendersForgeState?.let { BankScreen(it, "Defender's Forge", slotSize) }
 
@@ -131,17 +125,21 @@ fun InventoryScreen(
     val verticalScrollState = rememberScrollState()
     val horizontalScrollState = rememberScrollState()
 
-    BoxWithConstraints(modifier.fillMaxSize()) {
-        Row(Modifier.verticalScroll(verticalScrollState).horizontalScroll(horizontalScrollState)) {
-            EquipmentCard(equipmentState, slotSize)
-            InventoryCard(inventoryItemsState, slotSize, onClick)
-        }
+    Row(modifier.verticalScroll(verticalScrollState).horizontalScroll(horizontalScrollState)) {
+        EquipmentCard(equipmentState, slotSize)
+        InventoryCard(inventoryItemsState, slotSize, onClick)
     }
 }
 
 @Composable
 private fun EquipmentCard(equipment: EquipmentUiState, slotSize: Dp) {
     fun EquipmentSlotUiState.cells(): List<ItemUiState> = listOfNotNull(main, vanity, dye)
+
+    val armorCells = remember(equipment.armor) { equipment.armor.map { it.cells() } }
+    val accessoriesCells =
+        remember(equipment.accessories) { equipment.accessories.map { it.cells() } }
+    val miscCells = remember(equipment.misc) { equipment.misc.map { it.cells() } }
+
     Card {
         Column(
             Modifier.padding(SCREEN_PADDING),
@@ -151,13 +149,13 @@ private fun EquipmentCard(equipment: EquipmentUiState, slotSize: Dp) {
             Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     SectionTitle("Armor")
-                    SlotGrid(equipment.armor.map { it.cells() }, SLOT_GAP, slotSize)
+                    SlotGrid(armorCells, SLOT_GAP, slotSize)
                     SectionTitle("Misc")
-                    SlotGrid(equipment.misc.map { it.cells() }, SLOT_GAP, slotSize)
+                    SlotGrid(accessoriesCells, SLOT_GAP, slotSize)
                 }
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     SectionTitle("Accessories")
-                    SlotGrid(equipment.accessories.map { it.cells() }, SLOT_GAP, slotSize)
+                    SlotGrid(miscCells, SLOT_GAP, slotSize)
                 }
             }
         }

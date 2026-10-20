@@ -1,10 +1,4 @@
-package terralyze.data.source.parser.plrformat
-
-import self.adragon.terralyze.data.source.parser.plrformat.DifficultyFormat
-import self.adragon.terralyze.data.source.parser.plrformat.HideAccessoriesFormat
-import self.adragon.terralyze.data.source.parser.plrformat.MiscEquipmentsFormat
-import self.adragon.terralyze.data.source.parser.plrformat.PLRFormatSpec
-
+package self.adragon.terralyze.data.source.parser.plrformat
 
 object PLRFormat {
     fun forVersion(version: Int) = PLRFormatSpec(

@@ -5,15 +5,19 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.interaction.collectIsPressedAsState
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -64,6 +68,20 @@ fun HoverTooltip(
     ) { content(interactionSource, isPressed, isHovered) }
 }
 
+@Composable
+fun StatBar(label: String, value: Int, max: Int, color: Color, modifier: Modifier = Modifier) {
+    val fraction = if (max > 0) (value.toFloat() / max).coerceIn(0f, 1f) else 0f
+    Column(modifier, Arrangement.spacedBy(6.dp)) {
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+            SecondaryText(label)
+            ValueText("$value / $max")
+        }
+        LinearProgressIndicator(
+            { fraction }, Modifier.fillMaxWidth().height(10.dp),
+            color, MaterialTheme.colorScheme.surfaceVariant,
+        )
+    }
+}
 
 @Composable
 fun <T> DropDown(

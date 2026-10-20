@@ -12,6 +12,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import self.adragon.terralyze.data.repository.ItemCatalog
 import self.adragon.terralyze.data.source.crypto.PlrDecryptor
 import self.adragon.terralyze.data.source.itemcatalog.JsonItemCatalog
 import self.adragon.terralyze.data.source.parser.PlayerParser
@@ -68,8 +69,8 @@ private suspend fun initLoadPlayer(): LoadPlayerUseCase {
         .readBytes("files/items.json")
         .decodeToString()
 
-    val catalog = JsonItemCatalog(rawJson)
     val mapper = PlayerMapper()
+    val catalog = JsonItemCatalog(rawJson)
 
     return LoadPlayerUseCase(decryptor, parser, mapper, catalog)
 }

@@ -11,6 +11,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import kotlinx.serialization.Serializable
+import self.adragon.terralyze.data.repository.ItemCatalog
 import self.adragon.terralyze.ui.hub.PlayerHub
 
 @Composable
@@ -31,12 +32,12 @@ fun AppGraph(loadPlayer: LoadPlayerUseCase) {
                 }
             })
         }
-        composable<Routes.Hub> { player?.let { PlayerHub(it) } }
+        composable<Routes.Hub> { player?.let { PlayerHub(it, loadPlayer.catalog) } }
     }
 }
 
 @Serializable
-private  sealed interface Routes {
+private sealed interface Routes {
     @Serializable
     data object Load : Routes
 

@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -22,7 +21,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.ripple
@@ -50,6 +48,7 @@ import self.adragon.terralyze.ui.common.ItemImage
 import self.adragon.terralyze.ui.common.SecondaryText
 import self.adragon.terralyze.ui.common.SectionTitle
 import self.adragon.terralyze.ui.common.ValueText
+import self.adragon.terralyze.ui.common.StatBar
 import kotlin.time.Duration
 import kotlin.time.DurationUnit
 import kotlin.time.toDuration
@@ -89,10 +88,7 @@ val mockPlayer = Player(
 
 @Preview
 @Composable
-fun OverviewScreen(
-    player: Player = mockPlayer,
-    modifier: Modifier = Modifier,
-) {
+fun OverviewScreen(player: Player = mockPlayer, modifier: Modifier = Modifier) {
     BoxWithConstraints(modifier.fillMaxSize()) {
         val compact = maxWidth < 600.dp
 
@@ -181,24 +177,6 @@ private fun DeathsText(label: String, value: String) = Row(
 ) {
     SecondaryText(label)
     SecondaryText(value)
-}
-
-
-@Composable
-private fun StatBar(
-    label: String, value: Int, max: Int, color: Color, modifier: Modifier = Modifier
-) {
-    val fraction = if (max > 0) (value.toFloat() / max).coerceIn(0f, 1f) else 0f
-    Column(modifier, Arrangement.spacedBy(6.dp)) {
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            SecondaryText(label)
-            ValueText("$value / $max")
-        }
-        LinearProgressIndicator(
-            { fraction }, Modifier.fillMaxWidth().height(10.dp),
-            color, MaterialTheme.colorScheme.surfaceVariant,
-        )
-    }
 }
 
 @Composable

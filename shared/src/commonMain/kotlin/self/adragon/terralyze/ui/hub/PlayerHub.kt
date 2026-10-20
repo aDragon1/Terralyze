@@ -14,17 +14,27 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import kotlinx.serialization.Serializable
+import self.adragon.terralyze.data.repository.ItemCatalog
+import self.adragon.terralyze.domain.model.Difficulty
 import self.adragon.terralyze.domain.model.Player
+import self.adragon.terralyze.ui.hub.research.ResearchScreen
 import self.adragon.terralyze.ui.hub.storage.StorageScreen
 
 @Composable
-fun PlayerHub(player: Player) {
+fun PlayerHub(player: Player,catalog: ItemCatalog) {
     var currentDestination by rememberSaveable { mutableStateOf(HubDestination.Overview) }
+
+    val destinations = buildList {
+        add(HubDestination.Overview)
+        add(HubDestination.Storage)
+        if (player.difficulty == Difficulty.JOURNEY && player.researchEntries != null)
+            add(HubDestination.Researches)
+    }
 
     Scaffold(
         bottomBar = {
             NavigationBar {
-                HubDestination.entries.forEach { destination ->
+                destinations.forEach { destination ->
                     NavigationBarItem(
                         selected = currentDestination == destination,
                         onClick = { currentDestination = destination },
@@ -39,7 +49,7 @@ fun PlayerHub(player: Player) {
             when (currentDestination) {
                 HubDestination.Overview -> OverviewScreen(player)
                 HubDestination.Storage -> StorageScreen(player)
-                HubDestination.Researches -> Text("Изучения")
+                HubDestination.Researches -> ResearchScreen(player, catalog)
             }
         }
     }

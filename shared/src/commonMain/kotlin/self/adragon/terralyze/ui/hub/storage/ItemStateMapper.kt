@@ -1,4 +1,4 @@
-package self.adragon.terralyze.ui.hub.storage.inventory
+package self.adragon.terralyze.ui.hub.storage
 
 import self.adragon.terralyze.data.model.equipment.Equipment
 import self.adragon.terralyze.data.model.equipment.EquipmentSlot
