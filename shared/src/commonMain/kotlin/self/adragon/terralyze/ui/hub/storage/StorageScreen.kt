@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Card
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -25,16 +24,18 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import kotlinx.serialization.Serializable
 import self.adragon.terralyze.domain.model.Player
+import self.adragon.terralyze.ui.common.AppCard
 import self.adragon.terralyze.ui.common.DropDown
 import self.adragon.terralyze.ui.common.SectionTitle
 import self.adragon.terralyze.ui.common.SlotGrid
 
 private const val COLUMNS = 10
 private const val HOTBAR_SIZE = 10
-private const val COINS_AND_AMMO_SIZE = 8
+private const val COINS_SIZE = 4
+private const val AMMO_SIZE = 4
 private val SLOT_GAP = 4.dp
 private val MAX_SLOT_SIZE = 56.dp
-private val SCREEN_PADDING = 16.dp
+private val SCREEN_PADDING = 12.dp
 
 @Serializable
 enum class StorageDestination(val label: String) {
@@ -61,7 +62,6 @@ fun StorageScreen(player: Player, modifier: Modifier = Modifier) {
         if (storage.defendersForge != null) add(StorageDestination.DEFENDERS_FORGE)
         if (storage.voidVault != null) add(StorageDestination.VOID_VAULT)
     }
-
 
     val piggyBankState = remember(storage) { storage.piggyBank.map { it.toUiState() } }
     val safeState = remember(storage) { storage.safe.map { it.toUiState() } }
@@ -112,7 +112,7 @@ fun StorageScreen(player: Player, modifier: Modifier = Modifier) {
 
 @Composable
 private fun BankScreen(slots: List<ItemUiState>, title: String, slotSize: Dp) =
-    Column(Modifier.padding(SCREEN_PADDING), Arrangement.spacedBy(12.dp)) {
+    Column(Modifier.padding(SCREEN_PADDING), Arrangement.spacedBy(SCREEN_PADDING)) {
         SectionTitle(title)
         SlotGrid(slots.chunked(COLUMNS), SLOT_GAP, slotSize)
     }
@@ -121,14 +121,13 @@ private fun BankScreen(slots: List<ItemUiState>, title: String, slotSize: Dp) =
 fun InventoryScreen(
     inventoryItemsState: List<ItemUiState>, equipmentState: EquipmentUiState,
     slotSize: Dp, modifier: Modifier, onClick: (index: Int, state: ItemUiState) -> Unit
+) = Row(
+    modifier.verticalScroll(rememberScrollState())
+        .horizontalScroll(rememberScrollState()),
+    Arrangement.spacedBy(SCREEN_PADDING)
 ) {
-    val verticalScrollState = rememberScrollState()
-    val horizontalScrollState = rememberScrollState()
-
-    Row(modifier.verticalScroll(verticalScrollState).horizontalScroll(horizontalScrollState)) {
-        EquipmentCard(equipmentState, slotSize)
-        InventoryCard(inventoryItemsState, slotSize, onClick)
-    }
+    EquipmentCard(equipmentState, slotSize)
+    InventoryCard(inventoryItemsState, slotSize, onClick)
 }
 
 @Composable
@@ -140,10 +139,10 @@ private fun EquipmentCard(equipment: EquipmentUiState, slotSize: Dp) {
         remember(equipment.accessories) { equipment.accessories.map { it.cells() } }
     val miscCells = remember(equipment.misc) { equipment.misc.map { it.cells() } }
 
-    Card {
+    AppCard {
         Column(
             Modifier.padding(SCREEN_PADDING),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+            verticalArrangement = Arrangement.spacedBy(SCREEN_PADDING),
         ) {
             SectionTitle("Equipment")
             Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
@@ -166,17 +165,32 @@ private fun EquipmentCard(equipment: EquipmentUiState, slotSize: Dp) {
 private fun InventoryCard(
     inventoryItemsState: List<ItemUiState>, slotSize: Dp,
     onClick: (index: Int, state: ItemUiState) -> Unit
-) = Column(Modifier.padding(SCREEN_PADDING), Arrangement.spacedBy(12.dp)) {
-    val hotbar = inventoryItemsState.take(HOTBAR_SIZE)
-    val inventory = inventoryItemsState.drop(HOTBAR_SIZE).dropLast(COINS_AND_AMMO_SIZE)
-    val coinsAndAmmo = inventoryItemsState.takeLast(COINS_AND_AMMO_SIZE)
+) = AppCard {
+    Column(Modifier.padding(SCREEN_PADDING), Arrangement.spacedBy(SCREEN_PADDING)) {
+        val hotbar = inventoryItemsState.take(HOTBAR_SIZE)
+        val inventory = inventoryItemsState.drop(HOTBAR_SIZE).dropLast(COINS_SIZE + AMMO_SIZE)
+        val coins = inventoryItemsState.takeLast(COINS_SIZE + AMMO_SIZE).dropLast(AMMO_SIZE)
+        val ammo = inventoryItemsState.takeLast(AMMO_SIZE)
 
-    SectionTitle("Inventory")
-    SlotGrid(hotbar.chunked(COLUMNS), SLOT_GAP, slotSize, 0, onClick)
-    SlotGrid(inventory.chunked(COLUMNS), SLOT_GAP, slotSize, HOTBAR_SIZE, onClick)
-    SectionTitle("Money & Ammo")
-    SlotGrid(
-        coinsAndAmmo.chunked(COINS_AND_AMMO_SIZE), SLOT_GAP, slotSize,
-        inventoryItemsState.size - COINS_AND_AMMO_SIZE, onClick
-    )
+        SectionTitle("Inventory")
+        SlotGrid(hotbar.chunked(COLUMNS), SLOT_GAP, slotSize, 0, onClick)
+        SlotGrid(inventory.chunked(COLUMNS), SLOT_GAP, slotSize, HOTBAR_SIZE, onClick)
+
+        Row(horizontalArrangement = Arrangement.spacedBy(SCREEN_PADDING)) {
+            Column {
+                SectionTitle("Money")
+                SlotGrid(
+                    coins.chunked(COINS_SIZE), SLOT_GAP, slotSize,
+                    inventoryItemsState.size - COINS_SIZE - AMMO_SIZE, onClick
+                )
+            }
+            Column {
+                SectionTitle("Ammo")
+                SlotGrid(
+                    ammo.chunked(COINS_SIZE), SLOT_GAP, slotSize,
+                    inventoryItemsState.size - AMMO_SIZE, onClick
+                )
+            }
+        }
+    }
 }

@@ -6,24 +6,28 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 
 @Composable
-fun SectionTitle(text: String, modifier: Modifier = Modifier) = Text(
-    text = text, modifier = modifier, style = MaterialTheme.typography.titleMedium
+fun SectionTitle(text: String, modifier: Modifier = Modifier) =
+    Text(
+        text, modifier, style = MaterialTheme.typography.titleMedium
+    )
+
+@Composable
+fun SecondaryText(
+    text: String, modifier: Modifier = Modifier, minLines: Int = 1
+) = Text(
+    text, modifier, MaterialTheme.colorScheme.onSurfaceVariant,
+    style = MaterialTheme.typography.bodyMedium, minLines = minLines
 )
 
 @Composable
-fun SecondaryText(text: String, modifier: Modifier = Modifier) = Text(
-    text = text, modifier = modifier,
-    color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodyMedium
-)
+fun ValueText(text: String, modifier: Modifier = Modifier) =
+    Text(
+        text, modifier, style = MaterialTheme.typography.labelLarge
+    )
 
 @Composable
-fun ValueText(text: String, modifier: Modifier = Modifier) = Text(
-    text = text, modifier = modifier,
-    style = MaterialTheme.typography.labelLarge
-)
-
-@Composable
-fun CaptionText(text: String, modifier: Modifier = Modifier) = Text(
-    text, modifier,
-    color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.labelSmall
-)
+fun CaptionText(text: String, modifier: Modifier = Modifier) =
+    Text(
+        text, modifier, color = MaterialTheme.colorScheme.onSurfaceVariant,
+        style = MaterialTheme.typography.labelSmall
+    )

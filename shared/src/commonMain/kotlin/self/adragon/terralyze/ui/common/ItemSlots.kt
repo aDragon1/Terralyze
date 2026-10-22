@@ -58,15 +58,13 @@ fun SlotGrid(
 }
 
 @Composable
-fun ItemSlotFrame(slotGap: Dp, slotSize: Dp, content: @Composable BoxScope.() -> Unit) {
-    Box(
-        Modifier.size(slotSize)
-            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(6.dp))
-            .padding(slotGap),
-        contentAlignment = Alignment.Center,
-        content = content,
-    )
-}
+fun ItemSlotFrame(slotGap: Dp, slotSize: Dp, content: @Composable BoxScope.() -> Unit) = Box(
+    Modifier.size(slotSize)
+        .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(6.dp))
+        .padding(slotGap),
+    contentAlignment = Alignment.Center,
+    content = content,
+)
 
 @Composable
 fun ItemOverview(

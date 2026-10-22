@@ -10,7 +10,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import kotlinx.serialization.Serializable
@@ -20,10 +23,15 @@ import self.adragon.terralyze.domain.model.Player
 import self.adragon.terralyze.ui.hub.research.ResearchScreen
 import self.adragon.terralyze.ui.hub.storage.StorageScreen
 
-@Composable
-fun PlayerHub(player: Player,catalog: ItemCatalog) {
-    var currentDestination by rememberSaveable { mutableStateOf(HubDestination.Overview) }
+@Serializable
+enum class HubDestination { Overview, Storage, Researches, }
 
+@Composable
+fun PlayerHub(player: Player, catalog: ItemCatalog) {
+    val scope = rememberCoroutineScope()
+    val playerEditorStateHolder = remember(player) { PlayerEditorStateHolder(player, scope) }
+
+    var currentDestination by rememberSaveable { mutableStateOf(HubDestination.Overview) }
     val destinations = buildList {
         add(HubDestination.Overview)
         add(HubDestination.Storage)
@@ -46,14 +54,13 @@ fun PlayerHub(player: Player,catalog: ItemCatalog) {
         }
     ) { pad ->
         Box(Modifier.padding(pad).fillMaxSize()) {
-            when (currentDestination) {
-                HubDestination.Overview -> OverviewScreen(player)
-                HubDestination.Storage -> StorageScreen(player)
-                HubDestination.Researches -> ResearchScreen(player, catalog)
+            rememberSaveableStateHolder().SaveableStateProvider(currentDestination.name) {
+                when (currentDestination) {
+                    HubDestination.Overview -> OverviewScreen(playerEditorStateHolder)
+                    HubDestination.Storage -> StorageScreen(player)
+                    HubDestination.Researches -> ResearchScreen(player, catalog)
+                }
             }
         }
     }
 }
-
-@Serializable
-enum class HubDestination { Overview, Storage, Researches, }

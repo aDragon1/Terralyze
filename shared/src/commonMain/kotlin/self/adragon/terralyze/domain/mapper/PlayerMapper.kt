@@ -1,6 +1,6 @@
 package self.adragon.terralyze.domain.mapper
 
-import self.adragon.terralyze.data.model.ItemInfo
+import self.adragon.terralyze.data.model.item.CatalogItem
 import self.adragon.terralyze.data.model.ParsedFieldValue
 import self.adragon.terralyze.data.model.equipment.Equipment
 import self.adragon.terralyze.data.model.equipment.EquipmentSlot
@@ -240,20 +240,19 @@ class PlayerMapper {
         else -> Difficulty.NONE
     }
 
-    private fun mapItemInfo(raw: RawItem, info: ItemInfo) = Item(
+    private fun mapCatalogItem(raw: RawItem, info: CatalogItem) = Item(
         id = raw.id,
         prefix = raw.prefix.toInt(),
         name = info.name,
-        tags = info.tags,
+        tags = info.itemTags,
         itemUrl = info.itemUrl,
         imageUrl = info.imageUrl,
     )
 
-    private fun resolveItemById(catalog: ItemCatalog, raw: RawItem): ItemSlot =
-        when {
-            raw.id == 0 -> ItemSlot.Empty
-            else -> catalog.getItemById(raw.id)
-                ?.let { info -> ItemSlot.Resolved(mapItemInfo(raw, info)) }
-                ?: ItemSlot.UnknownById(raw.id)
-        }
+    private fun resolveItemById(catalog: ItemCatalog, raw: RawItem) = when {
+        raw.id == 0 -> ItemSlot.Empty
+        else -> catalog.getItemById(raw.id)
+            ?.let { info -> ItemSlot.Resolved(mapCatalogItem(raw, info)) }
+            ?: ItemSlot.UnknownById(raw.id)
+    }
 }

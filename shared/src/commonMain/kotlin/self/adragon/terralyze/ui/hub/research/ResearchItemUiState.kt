@@ -1,6 +1,6 @@
 package self.adragon.terralyze.ui.hub.research
 
-import self.adragon.terralyze.data.model.ItemInfo
+import self.adragon.terralyze.data.model.item.CatalogItem
 import self.adragon.terralyze.domain.model.ResearchItem
 
 sealed interface ResearchItemUiState {
@@ -11,32 +11,23 @@ sealed interface ResearchItemUiState {
     ) : ResearchItemUiState
 
     sealed interface Identified : ResearchItemUiState {
-        val info: ItemInfo
+        val catalogItem: CatalogItem
         val amount: Int
 
         val isCompleted: Boolean
-            get() = amount >= info.neededForResearch
+            get() = amount >= catalogItem.neededForResearch
     }
 
-    data class NotStarted(
-        override val info: ItemInfo
-    ) : Identified {
+    data class NotStarted(override val catalogItem: CatalogItem) : Identified {
         override val amount: Int = 0
     }
 
-    data class InProgress(
-        override val info: ItemInfo,
-        override val amount: Int
-    ) : Identified
-
-    data class Completed(
-        override val info: ItemInfo,
-        override val amount: Int
-    ) : Identified
+    data class InProgress(override val catalogItem: CatalogItem, override val amount: Int) : Identified
+    data class Completed(override val catalogItem: CatalogItem, override val amount: Int) : Identified
 }
 
 fun buildResearchUiState(
-    catalogItems: List<ItemInfo>, playerResearches: List<ResearchItem>?
+    catalogItems: List<CatalogItem>, playerResearches: List<ResearchItem>?
 ): List<ResearchItemUiState> {
     if (playerResearches == null) return emptyList()
 
@@ -57,11 +48,15 @@ fun buildResearchUiState(
 }
 
 fun ResearchItem.toUiState(): ResearchItemUiState {
-    if (info == null) return ResearchItemUiState.Unknown(internalName, amount)
+    if (catalogItem == null) return ResearchItemUiState.Unknown(internalName, amount)
 
     return when {
-        amount <= 0 -> ResearchItemUiState.NotStarted(info)
-        amount >= info.neededForResearch -> ResearchItemUiState.Completed(info, amount)
-        else -> ResearchItemUiState.InProgress(info, amount)
+        amount <= 0 -> ResearchItemUiState.NotStarted(catalogItem)
+        amount >= catalogItem.neededForResearch -> ResearchItemUiState.Completed(
+            catalogItem,
+            amount
+        )
+
+        else -> ResearchItemUiState.InProgress(catalogItem, amount)
     }
 }

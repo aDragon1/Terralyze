@@ -1,10 +1,10 @@
 package self.adragon.terralyze.domain.model
 
-import self.adragon.terralyze.data.model.ItemInfo
+import self.adragon.terralyze.data.model.item.CatalogItem
 
 data class ResearchItem(
     val internalName: String,
     val amount: Int,
-    val info: ItemInfo?
+    val catalogItem: CatalogItem?
 )
 
