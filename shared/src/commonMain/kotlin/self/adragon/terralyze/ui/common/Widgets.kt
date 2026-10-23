@@ -6,6 +6,7 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.interaction.collectIsPressedAsState
@@ -32,7 +33,9 @@ import androidx.compose.material3.TooltipAnchorPosition
 import androidx.compose.material3.TooltipBox
 import androidx.compose.material3.TooltipDefaults
 import androidx.compose.material3.rememberTooltipState
+import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -41,10 +44,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onPreviewKeyEvent
+import androidx.compose.ui.input.key.type
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import kotlin.math.round
@@ -58,28 +68,36 @@ fun AppCard(modifier: Modifier = Modifier, content: @Composable () -> Unit) = Ca
 ) { content() }
 
 @Composable
-fun <T> InlineValueEditor(
-    value: T, modifier: Modifier = Modifier,
-    content: @Composable (T) -> Unit,
-    onSave: (T) -> Unit,
-    editor: @Composable (
-        value: T,
-        onDone: (T) -> Unit,
-        onCancel: () -> Unit
-    ) -> Unit
+fun EditableContainer(
+    onClick: () -> Unit, modifier: Modifier = Modifier, isEditing: Boolean = false,
+    enabled: Boolean = true, content: @Composable () -> Unit,
 ) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isHovered by interactionSource.collectIsHoveredAsState()
+    val isPressed by interactionSource.collectIsPressedAsState()
+
+    val isHighlighted = isEditing || isHovered || isPressed
+
+    Box(
+        modifier.hoverable(interactionSource = interactionSource, enabled = enabled).clickable(
+            interactionSource, ripple(), enabled,
+            onClick = onClick,
+        ).border(
+            1.dp, if (isHighlighted) Color.Yellow else Color.Transparent,
+            RoundedCornerShape(8.dp),
+        )
+    ) { content() }
+}
+
+@Composable
+fun <T> InlineValueEditor(
+    value: T, modifier: Modifier = Modifier, content: @Composable (T) -> Unit, onSave: (T) -> Unit,
+    editor: @Composable (value: T, onDone: (T) -> Unit, onCancel: () -> Unit) -> Unit
+) = Column(modifier) {
     var isEditing by remember { mutableStateOf(false) }
-    Column(modifier) {
-        Box(Modifier.clickable { isEditing = !isEditing }) { content(value) }
-        AnimatedVisibility(isEditing) {
-            editor(
-                value,
-                {
-                    onSave(it)
-                    isEditing = false
-                },
-                { isEditing = false })
-        }
+    EditableContainer(isEditing = isEditing, onClick = { isEditing = true }) { content(value) }
+    AnimatedVisibility(isEditing) {
+        editor(value, { onSave(it); isEditing = false }, { isEditing = false })
     }
 }
 
@@ -91,7 +109,28 @@ fun InlineTextEditor(
     value, modifier, content, onSave, { initialValue, save, cancel ->
         var draft by remember(initialValue) { mutableStateOf(initialValue) }
         Column {
-            EditorTextField(draft, { draft = it })
+            val focus = remember { FocusRequester() }
+            LaunchedEffect(Unit) { focus.requestFocus() }
+
+            EditorTextField(
+                draft, { draft = it },
+                modifier = Modifier.focusRequester(focus).onPreviewKeyEvent { event ->
+                    if (event.type != KeyEventType.KeyUp) return@onPreviewKeyEvent false
+                    when (event.key) {
+                        Key.Enter -> {
+                            save(draft)
+                            true
+                        }
+
+                        Key.Escape -> {
+                            cancel()
+                            true
+                        }
+
+                        else -> false
+                    }
+                }
+            )
             Row {
                 TextButton(onClick = cancel) { SecondaryText("Cancel") }
                 TextButton(onClick = { save(draft) }) { SecondaryText("Save") }
@@ -106,20 +145,39 @@ fun InlineIntEditor(
     modifier: Modifier = Modifier, placeholder: String = ""
 ) = InlineValueEditor(
     value, modifier, content, onSave,
-    { initialValue, onDone, onCancel ->
+    { initialValue, save, cancel ->
         var draft by remember(initialValue) { mutableStateOf(initialValue.toString()) }
 
         Column {
+            val focus = remember { FocusRequester() }
+            LaunchedEffect(Unit) { focus.requestFocus() }
+
             EditorTextField(
                 draft, { input -> draft = input }, placeholder = placeholder,
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                modifier = Modifier.focusRequester(focus).onPreviewKeyEvent { event ->
+                    if (event.type != KeyEventType.KeyUp) return@onPreviewKeyEvent false
+                    when (event.key) {
+                        Key.Enter -> {
+                            draft.toIntOrNull()?.let(save)
+                            true
+                        }
+
+                        Key.Escape -> {
+                            cancel()
+                            true
+                        }
+
+                        else -> false
+                    }
+                }
             )
 
             Row {
-                TextButton(onClick = onCancel) { SecondaryText("Cancel") }
+                TextButton(onClick = cancel) { SecondaryText("Cancel") }
                 TextButton(
                     enabled = draft.toIntOrNull() != null,
-                    onClick = { draft.toIntOrNull()?.let(onDone) }
+                    onClick = { draft.toIntOrNull()?.let(save) }
                 ) { SecondaryText("Save") }
             }
         }
@@ -128,16 +186,88 @@ fun InlineIntEditor(
 
 @Composable
 fun <T> InlineDropdown(
-    value: T, items: List<T>, content: @Composable (value: T) -> Unit, itemLabel: (T) -> String,
-    onSave: (T) -> Unit, modifier: Modifier = Modifier
-) {
-    InlineValueEditor(
-        value, modifier, content, onSave, { initialValue, save, cancel ->
-            var draft by remember(initialValue) { mutableStateOf(initialValue) }
-            DropDown(
-                draft, items, { save(it) }, { itemLabel(it) })
+    value: T, items: List<T>, content: @Composable (T) -> Unit,
+    itemLabel: (T) -> String, onSave: (T) -> Unit, modifier: Modifier = Modifier,
+) = Box(modifier) {
+    var expanded by remember { mutableStateOf(false) }
+    EditableContainer(isEditing = expanded, onClick = { expanded = true }) { content(value) }
+    DropdownMenu(expanded, { expanded = false }) {
+        items.forEach {
+            DropdownMenuItem({ Text(itemLabel(it)) }, { onSave(it); expanded = false })
         }
-    )
+    }
+}
+
+@Composable
+fun InlineCurrentMaxEditor(
+    current: Int, maximum: Int, label: String, color: Color,
+    onSave: (current: Int, maximum: Int) -> Unit, modifier: Modifier = Modifier,
+) = InlineValueEditor(
+    Pair(current, maximum), modifier, { StatBar(label, it.first, it.second, color) },
+    { updated -> onSave(updated.first, updated.second) },
+) { initialValue, save, cancel ->
+    var currentDraft by remember(initialValue) { mutableStateOf("${initialValue.first}") }
+    var maximumDraft by remember(initialValue) { mutableStateOf("${initialValue.second}") }
+
+    val parsedCurrent = currentDraft.toIntOrNull()
+    val parsedMaximum = maximumDraft.toIntOrNull()
+    val isValid = parsedCurrent != null && parsedMaximum != null && parsedMaximum >= 0
+
+    val currentFocus = remember { FocusRequester() }
+    val maximumFocus = remember { FocusRequester() }
+    LaunchedEffect(Unit) { currentFocus.requestFocus() }
+
+    Column(
+        modifier = Modifier.padding(top = 8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Column(Modifier.weight(1f)) {
+                CaptionText("Current")
+                EditorTextField(
+                    currentDraft, { currentDraft = it },
+                    Modifier.fillMaxWidth().focusRequester(currentFocus).onPreviewKeyEvent {
+                        if (it.type == KeyEventType.KeyUp && it.key == Key.Enter) {
+                            maximumFocus.requestFocus()
+                            true
+                        } else false
+                    },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                )
+            }
+
+            Column(Modifier.weight(1f)) {
+                CaptionText("Maximum")
+                EditorTextField(
+                    maximumDraft, { maximumDraft = it },
+                    Modifier.fillMaxWidth().focusRequester(maximumFocus).onPreviewKeyEvent {
+                        if (it.type != KeyEventType.KeyUp) return@onPreviewKeyEvent false
+
+                        when (it.key) {
+                            Key.Enter -> {
+                                if (isValid) save(parsedCurrent to parsedMaximum)
+                                true
+                            }
+
+                            Key.Escape -> {
+                                cancel()
+                                true
+                            }
+
+                            else -> false
+                        }
+                    },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                )
+            }
+        }
+        Row {
+            TextButton(onClick = cancel) { SecondaryText("Cancel") }
+            TextButton(
+                enabled = isValid, onClick = { save(Pair(parsedCurrent!!, parsedMaximum!!)) },
+            ) { SecondaryText("Save") }
+        }
+    }
 }
 
 @Composable
@@ -172,20 +302,17 @@ fun EditorTextField(
     value: String, onValueChange: (String) -> Unit, modifier: Modifier = Modifier,
     placeholder: String = "", keyboardOptions: KeyboardOptions = KeyboardOptions.Default
 ) = TextField(
-    value, onValueChange, modifier, placeholder = { CaptionText(placeholder) }, singleLine = true,
+    value,
+    onValueChange,
+    modifier,
+    placeholder = { CaptionText(placeholder) },
+    singleLine = true,
     keyboardOptions = keyboardOptions
 )
 
 @Composable
-fun HoverTooltip(
-    hint: String,
-    content: @Composable (source: MutableInteractionSource, isPressed: Boolean, isHovered: Boolean) -> Unit
-) {
+fun HoverTooltip(hint: String, content: @Composable () -> Unit) {
     val tooltipState = rememberTooltipState()
-    val interactionSource = remember { MutableInteractionSource() }
-    val isHovered by interactionSource.collectIsHoveredAsState()
-    val isPressed by interactionSource.collectIsPressedAsState()
-
     TooltipBox(
         positionProvider = TooltipDefaults.rememberTooltipPositionProvider(
             TooltipAnchorPosition.Above
@@ -204,7 +331,7 @@ fun HoverTooltip(
             }
         },
         tooltipState,
-    ) { content(interactionSource, isPressed, isHovered) }
+    ) { content() }
 }
 
 @Composable
@@ -216,7 +343,8 @@ fun StatBar(
     Column(modifier, Arrangement.spacedBy(6.dp)) {
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             SecondaryText(label)
-            val percentText = if (showPercent) " · ${round(fraction * 100 * 100) / 100} %" else ""
+            val percentText =
+                if (showPercent) " · ${round(fraction * 100 * 100) / 100} %" else ""
             ValueText("$value / $max $percentText")
         }
         RoundedProgressBar(

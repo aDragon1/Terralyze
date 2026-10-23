@@ -89,9 +89,6 @@ fun ResearchScreen(player: Player, catalog: ItemCatalog, modifier: Modifier = Mo
         buildResearchUiState(catalog.getAllItems(), entries)
     }
     val tags = remember(catalog) { catalog.getAllTags() }
-    val identifiedItems = remember(researchItems) {
-        researchItems.filterIsInstance<ResearchItemUiState.Identified>()
-    }
 
     var selectedTag by rememberSaveable { mutableStateOf<ItemTag?>(null) }
     var searchQuery by rememberSaveable { mutableStateOf("") }
@@ -124,14 +121,9 @@ fun ResearchScreen(player: Player, catalog: ItemCatalog, modifier: Modifier = Mo
 
 @Composable
 private fun ResearchHeader(
-    items: List<ResearchItemUiState>,
-    searchQuery: String,
-    filterSelected: ResearchFilter,
-    tagSelection: ItemTag?,
-    tags: List<ItemTag>,
-    onSearchQueryChange: (String) -> Unit,
-    onFilterSelect: (ResearchFilter) -> Unit,
-    onTagSelect: (ItemTag?) -> Unit,
+    items: List<ResearchItemUiState>, searchQuery: String, filterSelected: ResearchFilter,
+    tagSelection: ItemTag?, tags: List<ItemTag>, onSearchQueryChange: (String) -> Unit,
+    onFilterSelect: (ResearchFilter) -> Unit, onTagSelect: (ItemTag?) -> Unit,
     modifier: Modifier = Modifier
 ) = AppCard(modifier.fillMaxWidth()) {
     val completedCount = items.count { it is ResearchItemUiState.Identified && it.isCompleted }
@@ -167,7 +159,7 @@ fun ResearchItemCard(item: ResearchItemUiState.Identified, modifier: Modifier = 
                     minLines = 3
                 )
             }
-            val label = if (item.isCompleted) "Completed" else "Research"
+            val label = if (item.isCompleted) "Completed" else "Not started"
             val statColor =
                 if (item.isCompleted) MaterialTheme.colorScheme.tertiary else Color.Yellow
             StatBar(label, item.amount, item.catalogItem.neededForResearch, statColor)

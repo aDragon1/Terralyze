@@ -2,8 +2,6 @@ package self.adragon.terralyze.ui.hub
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -22,7 +20,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -44,14 +41,15 @@ import self.adragon.terralyze.domain.model.PlayerStats
 import self.adragon.terralyze.domain.model.PlayerStorage
 import self.adragon.terralyze.ui.common.AppCard
 import self.adragon.terralyze.ui.common.CaptionText
+import self.adragon.terralyze.ui.common.EditableContainer
 import self.adragon.terralyze.ui.common.HoverTooltip
+import self.adragon.terralyze.ui.common.InlineCurrentMaxEditor
 import self.adragon.terralyze.ui.common.InlineDropdown
 import self.adragon.terralyze.ui.common.InlineIntEditor
 import self.adragon.terralyze.ui.common.InlineTextEditor
 import self.adragon.terralyze.ui.common.ItemImage
 import self.adragon.terralyze.ui.common.SecondaryText
 import self.adragon.terralyze.ui.common.SectionTitle
-import self.adragon.terralyze.ui.common.StatBar
 import self.adragon.terralyze.ui.common.ValueText
 import kotlin.time.Duration
 import kotlin.time.DurationUnit
@@ -96,6 +94,10 @@ fun OverviewScreen(playerEditor: PlayerEditorStateHolder, modifier: Modifier = M
         val compact = maxWidth < 600.dp
         val player by playerEditor.editedPlayer.collectAsState()
 
+        val deathsPVE = player.playerStats.deathsPVE
+        val deathsPVP = player.playerStats.deathsPVP
+        val permanentUpgrade = player.progress.permanentUpgrades
+
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -104,29 +106,19 @@ fun OverviewScreen(playerEditor: PlayerEditorStateHolder, modifier: Modifier = M
             item { PlayerHeader(player, playerEditor::onIntent) }
             item {
                 if (compact) Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    DeathsCard(
-                        player.playerStats.deathsPVE, player.playerStats.deathsPVP,
-                        playerEditor::onIntent
-                    )
+                    DeathsCard(deathsPVE, deathsPVP, playerEditor::onIntent)
                     ProgressCard(player.progress, playerEditor::onIntent)
+                    PermanentUpgradesCard(permanentUpgrade, onIntent = playerEditor::onIntent)
+                }
+                else Row(Modifier.fillMaxWidth(), Arrangement.spacedBy(12.dp)) {
+                    Column(Modifier.weight(1f), Arrangement.spacedBy(12.dp)) {
+                        DeathsCard(deathsPVE, deathsPVP, playerEditor::onIntent)
+                        ProgressCard(player.progress, playerEditor::onIntent)
+                    }
                     PermanentUpgradesCard(
-                        player.progress.permanentUpgrades, onIntent = playerEditor::onIntent
+                        permanentUpgrade, Modifier.weight(1.5f), onIntent = playerEditor::onIntent
                     )
                 }
-                else
-                    Row(Modifier.fillMaxWidth(), Arrangement.spacedBy(12.dp)) {
-                        Column(Modifier.weight(1f), Arrangement.spacedBy(12.dp)) {
-                            DeathsCard(
-                                player.playerStats.deathsPVE, player.playerStats.deathsPVP,
-                                playerEditor::onIntent
-                            )
-                            ProgressCard(player.progress, playerEditor::onIntent)
-                        }
-                        PermanentUpgradesCard(
-                            player.progress.permanentUpgrades, Modifier.weight(1.5f),
-                            onIntent = playerEditor::onIntent
-                        )
-                    }
             }
         }
     }
@@ -165,12 +157,14 @@ private fun PlayerHeader(player: Player, onIntent: (PlayerEditorIntent) -> Unit)
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
             ) {
-                StatBar(
-                    "Health", stats.life, stats.maxLife, MaterialTheme.colorScheme.errorContainer,
+                InlineCurrentMaxEditor(
+                    stats.life, stats.maxLife, "Health", MaterialTheme.colorScheme.errorContainer,
+                    { a, b -> onIntent(PlayerEditorIntent.Stats.UpdateHealth(a, b)) },
                     Modifier.weight(1f)
                 )
-                StatBar(
-                    "Mana", stats.mana, stats.maxMana, Color.Blue,
+                InlineCurrentMaxEditor(
+                    stats.mana, stats.maxMana, "Mana", Color.Blue,
+                    { a, b -> onIntent(PlayerEditorIntent.Stats.UpdateMana(a, b)) },
                     Modifier.weight(1f)
                 )
             }
@@ -189,24 +183,15 @@ private fun DeathsCard(
     ) {
         SectionTitle("Deaths")
 
-//        private fun IntEditorIfNotNull1(
-//            value: Int?,
-//            content: @Composable (Int) -> Unit,
-//            fallback: @Composable () -> Unit,
-//            onSave: (Int) -> Unit
-//        ) = if (value != null) InlineIntEditor(value, content, { onSave(it) })
-//        else fallback()
+        NullableIntEditor(
+            deathsPVE, { DeathsText("PvE", it) },
+            { onIntent(PlayerEditorIntent.Stats.UpdateDeathsPVE(it)) })
 
-
-        if (deathsPVE != null) InlineIntEditor(
-            deathsPVE, { DeathsText("PvE", "$it") },
-            { onIntent(PlayerEditorIntent.Stats.UpdateDeathsPVE(it)) }
-        ) else DeathsText("PvE", "-")
         HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-        if (deathsPVP != null) InlineIntEditor(
-            deathsPVP, { DeathsText("PvP", "$it") },
-            { onIntent(PlayerEditorIntent.Stats.UpdateDeathsPVP(it)) }
-        ) else DeathsText("PvP", "-")
+
+        NullableIntEditor(
+            deathsPVP, { DeathsText("PvP", it) },
+            { onIntent(PlayerEditorIntent.Stats.UpdateDeathsPVP(it)) })
     }
 }
 
@@ -220,36 +205,29 @@ private fun DeathsText(label: String, value: String) = Row(
 }
 
 @Composable
-private fun ProgressItem(name: String, value: String, hint: String) {
-    HoverTooltip(hint) { source, isPressed, isHovered ->
-        val shouldHighlight = isPressed || isHovered
-        Surface(
-            Modifier.widthIn(min = 190.dp)
-                .hoverable(source)
-
-                .border(
-                    width = 1.dp,
-                    color = if (shouldHighlight) Color.Yellow else Color.Transparent,
-                    shape = RoundedCornerShape(8.dp)
-                ),
-            RoundedCornerShape(10.dp),
-            MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.55f),
+private fun ProgressItem(name: String, value: String) =
+    Surface(
+        Modifier.widthIn(min = 190.dp),
+        RoundedCornerShape(10.dp),
+        MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.55f),
+    ) {
+        Row(
+            Modifier.padding(12.dp, 8.dp),
+            Arrangement.spacedBy(12.dp), Alignment.CenterVertically,
         ) {
-            Row(
-                Modifier.padding(12.dp, 8.dp),
-                Arrangement.spacedBy(12.dp),
-                Alignment.CenterVertically,
-            ) {
-                SecondaryText(name, Modifier.weight(1f))
-                ValueText(value)
-            }
+            SecondaryText(name, Modifier.weight(1f))
+            ValueText(value)
         }
     }
-}
 
 @Composable
-private fun ProgressCard(progress: PlayerProgress, onIntent: (PlayerEditorIntent) -> Unit) {
+private fun ProgressCard(progress: PlayerProgress, onIntent: (PlayerEditorIntent) -> Unit) =
     AppCard(Modifier.fillMaxWidth()) {
+        val anglerQuests = progress.numberOfAnglerQuestsFinished
+        val golferScore = progress.golferScoreAccumulated
+        val downedDD2event = progress.downedDd2Event
+        val bartenderQuestLog = progress.bartenderQuestLog
+
         Column(
             modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -257,41 +235,27 @@ private fun ProgressCard(progress: PlayerProgress, onIntent: (PlayerEditorIntent
             SectionTitle("Progress")
             FlowRow(Modifier, Arrangement.spacedBy(8.dp), Arrangement.spacedBy(8.dp)) {
 
-                if (progress.numberOfAnglerQuestsFinished != null) InlineIntEditor(
-                    progress.numberOfAnglerQuestsFinished,
-                    { ProgressItem("Angler Quests", "$it", "Number of completed Angler quests") },
-                    { onIntent(PlayerEditorIntent.Progress.UpdateAnglerQuests(it)) }
-                ) else ProgressItem("Angler Quests", "-", "Number of completed Angler quests")
+                NullableIntEditor(
+                    anglerQuests, { ProgressItem("Angler Quests", it) },
+                    { onIntent(PlayerEditorIntent.Progress.UpdateAnglerQuests(it)) })
+                NullableIntEditor(
+                    golferScore, { ProgressItem("Golfer Score", it) },
+                    { onIntent(PlayerEditorIntent.Progress.UpdateGolferScore(it)) })
 
-                if (progress.golferScoreAccumulated != null) InlineIntEditor(
-                    progress.golferScoreAccumulated,
-                    { ProgressItem("Golfer score", "$it", "Golfer score accumulated") },
-                    { onIntent(PlayerEditorIntent.Progress.UpdateGolferScore(it)) }
-                ) else ProgressItem("Golfer score", "-", "Golfer score accumulated")
-
-                val downedDd2EventStr =
-                    progress.downedDd2Event?.let { if (it) "Yes" else "No" } ?: "-"
-                val bartenderQuestLogStr = progress.bartenderQuestLog?.toString() ?: "-"
-
-                if (progress.downedDd2Event != null) InlineDropdown(
-                    progress.downedDd2Event, listOf(true, false),
-                    {
+                if (downedDD2event != null) {
+                    val downedDd2EventStr = if (downedDD2event) "Completed" else "Not completed"
+                    EditableContainer({ onIntent(PlayerEditorIntent.Progress.ToggleDownedDd2Event) }) {
                         ProgressItem(
-                            "Old one's army", downedDd2EventStr,
-                            "Does Old one's army event completed"
+                            "Old one's army", downedDd2EventStr
                         )
-                    }, { "$it" }, { onIntent(PlayerEditorIntent.Progress.UpdateDownedDd2Event(it)) }
-                ) else ProgressItem("Old one's army", "-", "Does Old one's army event completed")
-
-                ProgressItem(
-                    "Bartender quest",
-                    bartenderQuestLogStr,
-                    "IDK what is this, tbh"
-                )
+                    }
+                } else ProgressItem("Old one's army", "-")
+                NullableIntEditor(
+                    bartenderQuestLog, { ProgressItem("Bartender quest", it) },
+                    { onIntent(PlayerEditorIntent.Progress.UpdateBartenderQuestLog(it)) })
             }
         }
     }
-}
 
 @Composable
 private fun PermanentUpgradeItem(
@@ -302,42 +266,34 @@ private fun PermanentUpgradeItem(
     val outline = scheme.outline
     val outlineVariant = scheme.outlineVariant
 
-    val borderColor = upgrade.isUsed?.let { if (it) primary else outline } ?: outlineVariant
+    val isEditable = upgrade.isUsed != null
+    val stateBorderColor = upgrade.isUsed?.let { if (it) primary else outline } ?: outlineVariant
 
-    HoverTooltip(upgrade.effect) { source, isPressed, isHovered ->
-        val shouldHighlight = isPressed || isHovered
-        Column(
-            Modifier.width(96.dp).hoverable(source)
-                .clickable(source, ripple()) {
-                    if (upgrade.isUsed != null) onIntent(
-                        PlayerEditorIntent.Progress.ToggleUpgrade(upgrade.name, upgrade.isUsed)
-                    )
-                },
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(4.dp),
-        ) {
-            Box(
-                modifier = Modifier.size(56.dp)
-                    .border(
-                        width = 1.dp,
-                        color = if (shouldHighlight) Color.Yellow else borderColor,
-                        shape = RoundedCornerShape(8.dp)
-                    ).padding(6.dp),
-                contentAlignment = Alignment.Center,
+    HoverTooltip(upgrade.effect) {
+        EditableContainer(enabled = isEditable, onClick = {
+            onIntent(PlayerEditorIntent.Progress.ToggleUpgrade(upgrade.name))
+        }) {
+            Column(
+                Modifier.width(96.dp), Arrangement.spacedBy(4.dp), Alignment.CenterHorizontally
             ) {
-                ItemImage(upgrade.name, upgrade.imageUrl)
+                Box(
+                    Modifier.size(56.dp).border(1.dp, stateBorderColor, RoundedCornerShape(8.dp))
+                        .padding(6.dp), Alignment.Center
+                ) {
+                    ItemImage(upgrade.name, upgrade.imageUrl)
 
-                Canvas(modifier = Modifier.align(Alignment.BottomEnd).size(8.dp)) {
-                    drawCircle(
-                        color = when (upgrade.isUsed) {
-                            true -> Color.Green
-                            false -> Color.Red
-                            null -> primary
-                        },
-                    )
+                    Canvas(modifier = Modifier.align(Alignment.BottomEnd).size(8.dp)) {
+                        drawCircle(
+                            color = when (upgrade.isUsed) {
+                                true -> Color.Green
+                                false -> Color.Red
+                                null -> primary
+                            },
+                        )
+                    }
                 }
+                CaptionText(upgrade.name)
             }
-            CaptionText(upgrade.name)
         }
     }
 }
@@ -360,3 +316,9 @@ private fun PermanentUpgradesCard(
 
 private fun mapPlaytime(duration: Duration): String =
     "${duration.inWholeDays}д ${duration.inWholeHours % 24}ч ${duration.inWholeMinutes % 60}м"
+
+@Composable
+private fun NullableIntEditor(
+    value: Int?, content: @Composable (String) -> Unit, onSave: (Int) -> Unit
+) = if (value != null) InlineIntEditor(value, { content("$it") }, onSave)
+else content("-")

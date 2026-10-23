@@ -2,8 +2,6 @@ package self.adragon.terralyze.ui.common
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -14,7 +12,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -74,7 +71,7 @@ fun ItemOverview(
     when (itemState) {
         ItemUiState.Empty -> Unit
         is ItemUiState.Unknown -> UnknownItem(itemState.id, Modifier.align(Alignment.BottomEnd))
-        is ItemUiState.Filled -> FilledItem(itemState, onClick)
+        is ItemUiState.Filled -> FilledItem(itemState)
     }
 }
 
@@ -83,37 +80,29 @@ fun UnknownItem(id: Int, modifier: Modifier = Modifier) =
     CaptionText(id.toString(), modifier.padding(2.dp))
 
 @Composable
-fun FilledItem(itemState: ItemUiState.Filled, onClick: () -> Unit) {
+fun FilledItem(itemState: ItemUiState.Filled) {
     val name = itemState.item.name
     val id = itemState.item.id
     val stack = itemState.stack
 
     val favoritedStr = if (itemState.favorited) "{Favorite}" else ""
-    HoverTooltip("$name (#$id) $favoritedStr") { source, isPressed, isHovered ->
-        val shouldHighlight = isPressed || isHovered
-        Box(
-            Modifier
-                .hoverable(source)
-                .clickable(source, indication = ripple()) {
-                    onClick()
-                }
-                .fillMaxSize()
-                .border(
-                    width = 1.dp,
-                    color = if (shouldHighlight) Color.Yellow else Color.Transparent,
-                    shape = RoundedCornerShape(8.dp)
-                )
-                .then(
-                    if (itemState.favorited) Modifier.wavyBorder(MaterialTheme.colorScheme.tertiary)
-                    else Modifier
-                ),
-            Alignment.Center
-        ) {
-            ItemImage(name, itemState.item.imageUrl)
-            if (stack > 1)
-                ValueText(
-                    stack.toString(), Modifier.align(Alignment.BottomEnd).padding(2.dp)
-                )
-        }
+    Box(
+        Modifier.fillMaxSize()
+            .border(
+                width = 1.dp,
+                color = Color.Transparent,
+                shape = RoundedCornerShape(8.dp)
+            )
+            .then(
+                if (itemState.favorited) Modifier.wavyBorder(MaterialTheme.colorScheme.tertiary)
+                else Modifier
+            ),
+        Alignment.Center
+    ) {
+        ItemImage(name, itemState.item.imageUrl)
+        if (stack > 1)
+            ValueText(
+                stack.toString(), Modifier.align(Alignment.BottomEnd).padding(2.dp)
+            )
     }
 }

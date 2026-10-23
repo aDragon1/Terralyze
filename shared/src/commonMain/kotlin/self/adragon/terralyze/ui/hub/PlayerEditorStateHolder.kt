@@ -42,15 +42,26 @@ class PlayerEditorStateHolder(
             it.copy(playerStats = it.playerStats.copy(deathsPVP = intent.deaths))
         }
 
-        is PlayerEditorIntent.Stats.UpdateHealth -> {}
-        is PlayerEditorIntent.Stats.UpdateMana -> {}
+        is PlayerEditorIntent.Stats.UpdateHealth -> _editedPlayer.update {
+            if (intent.life > intent.maxLife) return@update it
+            it.copy(playerStats = it.playerStats.copy(life = intent.life, maxLife = intent.maxLife))
+        }
+
+        is PlayerEditorIntent.Stats.UpdateMana -> _editedPlayer.update {
+            if (intent.mana > intent.maxMana) return@update it
+            it.copy(playerStats = it.playerStats.copy(mana = intent.mana, maxMana = intent.maxMana))
+        }
+
         is PlayerEditorIntent.Stats.UpdatePlaytime -> {}
     }
 
     private fun onProgressIntent(intent: PlayerEditorIntent.Progress) = when (intent) {
         is PlayerEditorIntent.Progress.ToggleUpgrade -> _editedPlayer.update {
             it.copy(progress = it.progress.copy(permanentUpgrades = it.progress.permanentUpgrades.map { other ->
-                other.copy(isUsed = if (other.name == intent.upgradeName) !intent.isUsed else other.isUsed)
+                other.copy(
+                    isUsed = if (other.isUsed != null && other.name == intent.upgradeName)
+                        !other.isUsed else other.isUsed
+                )
             }))
         }
 
@@ -62,8 +73,22 @@ class PlayerEditorStateHolder(
             it.copy(progress = it.progress.copy(golferScoreAccumulated = intent.score))
         }
 
-        is PlayerEditorIntent.Progress.UpdateDownedDd2Event -> _editedPlayer.update {
-            it.copy(progress = it.progress.copy(downedDd2Event = intent.isDowned))
+        is PlayerEditorIntent.Progress.ToggleDownedDd2Event -> _editedPlayer.update {
+            it.copy(
+                progress = it.progress.copy(
+                    downedDd2Event = if (it.progress.downedDd2Event != null) !it.progress.downedDd2Event
+                    else null
+                )
+            )
+        }
+
+        is PlayerEditorIntent.Progress.UpdateBartenderQuestLog -> _editedPlayer.update {
+            it.copy(
+                progress = it.progress.copy(
+                    bartenderQuestLog = if (it.progress.bartenderQuestLog != null) intent.value
+                    else null
+                )
+            )
         }
     }
 }
@@ -80,10 +105,11 @@ sealed interface PlayerEditorIntent {
     }
 
     sealed interface Progress : PlayerEditorIntent {
-        data class ToggleUpgrade(val upgradeName: String, val isUsed: Boolean) : Progress
+        data class ToggleUpgrade(val upgradeName: String) : Progress
         data class UpdateAnglerQuests(val count: Int) : Progress
         data class UpdateGolferScore(val score: Int) : Progress
-        data class UpdateDownedDd2Event(val isDowned: Boolean) : Progress
+        data class UpdateBartenderQuestLog(val value: Int) : Progress
+        data object ToggleDownedDd2Event : Progress
     }
 
     sealed interface Storage : PlayerEditorIntent {
