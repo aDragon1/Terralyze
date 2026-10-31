@@ -1,21 +1,11 @@
 package self.adragon.terralyze.domain.mapper
 
-import self.adragon.terralyze.data.model.item.CatalogItem
 import self.adragon.terralyze.data.model.ParsedFieldValue
-import self.adragon.terralyze.data.model.equipment.Equipment
-import self.adragon.terralyze.data.model.equipment.EquipmentSlot
-import self.adragon.terralyze.data.model.equipment.MiscEquipmentSlot
 import self.adragon.terralyze.data.model.getOrNull
-import self.adragon.terralyze.data.model.item.BankItem
-import self.adragon.terralyze.data.model.item.EquipmentItem
-import self.adragon.terralyze.data.model.item.InventoryItem
-import self.adragon.terralyze.data.model.item.RawItem
 import self.adragon.terralyze.data.model.player.ParsedPlayer
 import self.adragon.terralyze.data.model.player.ResearchEntry
 import self.adragon.terralyze.data.repository.ItemCatalog
 import self.adragon.terralyze.domain.model.Difficulty
-import self.adragon.terralyze.domain.model.Item
-import self.adragon.terralyze.domain.model.ItemSlot
 import self.adragon.terralyze.domain.model.PermanentUpgrade
 import self.adragon.terralyze.domain.model.Player
 import self.adragon.terralyze.domain.model.PlayerAppearance
@@ -38,9 +28,8 @@ class PlayerMapper {
             team = parsed.team.getOrNull()?.toInt(),
             progress = mapProgress(catalog, parsed),
             taxMoney = parsed.taxMoney.getOrNull(),
-            equipment = mapEquipment(catalog, parsed.equipment),
-            inventory = mapInventory(catalog, parsed.inventory),
-            playerStorage = mapStorage(catalog, parsed),
+            equipment =parsed.equipment,
+            playerStorage = mapStorage(parsed),
             voidVaultInfo = parsed.voidVaultInfo.getOrNull()?.toInt(),
             buffs = parsed.buffs.getOrNull(),
             sp = parsed.sp,
@@ -105,53 +94,14 @@ class PlayerMapper {
 //    }
     }
 
-    private fun mapStorage(catalog: ItemCatalog, parsed: ParsedPlayer): PlayerStorage {
-        fun mapBankItem(rawBankItem: BankItem<RawItem>) =
-            BankItem(resolveItemById(catalog, rawBankItem.item), rawBankItem.stack)
+    private fun mapStorage(parsed: ParsedPlayer): PlayerStorage {
+        val inventory = parsed.inventory
+        val piggyBank = parsed.piggyBank
+        val safe = parsed.safe
+        val defendersForge = parsed.defendersForge.getOrNull()
+        val voidVault = parsed.voidVault.getOrNull()
 
-        val piggyBank = parsed.piggyBank.map { mapBankItem(it) }
-        val safe = parsed.safe.map { mapBankItem(it) }
-        val defendersForge = parsed.defendersForge.getOrNull()?.map { mapBankItem(it) }
-        val voidVault = parsed.voidVault.getOrNull()?.map { mapInventoryItem(catalog, it) }
-
-        return PlayerStorage(piggyBank, safe, defendersForge, voidVault)
-    }
-
-    private fun mapInventoryItem(catalog: ItemCatalog, rawItem: InventoryItem<RawItem>) =
-        InventoryItem(resolveItemById(catalog, rawItem.item), rawItem.stack, rawItem.favorited)
-
-    private fun mapInventory(catalog: ItemCatalog, inventory: List<InventoryItem<RawItem>>) =
-        inventory.map { mapInventoryItem(catalog, it) }
-
-    private fun mapEquipment(
-        catalog: ItemCatalog,
-        rawEquipment: Equipment<RawItem>
-    ): Equipment<ItemSlot> {
-        fun mapEquipmentItem(rawEquipmentItem: EquipmentItem<RawItem>) = EquipmentItem(
-            resolveItemById(catalog, rawEquipmentItem.item),
-            rawEquipmentItem.favorited
-        )
-
-        fun mapEquipmentSlot(rawSlot: EquipmentSlot<RawItem>) = EquipmentSlot(
-            mapEquipmentItem(rawSlot.main),
-            mapEquipmentItem(rawSlot.vanity),
-            mapEquipmentItem(rawSlot.dye)
-        )
-
-        fun mapMiscEquipmentSlot(rawSlot: MiscEquipmentSlot<RawItem>) = MiscEquipmentSlot(
-            resolveItemById(catalog, rawSlot.main),
-            resolveItemById(catalog, rawSlot.dye)
-        )
-
-        val rawArmor = rawEquipment.armor
-        val rawAccessories = rawEquipment.accessories
-        val rawMisc = rawEquipment.misc
-
-        val armor = rawArmor.map { mapEquipmentSlot(it) }
-        val accessories = rawAccessories.map { mapEquipmentSlot(it) }
-        val misc = rawMisc.map { mapMiscEquipmentSlot(it) }
-
-        return Equipment(armor, accessories, misc)
+        return PlayerStorage(inventory, piggyBank, safe, defendersForge, voidVault)
     }
 
     private fun mapProgress(catalog: ItemCatalog, parsed: ParsedPlayer): PlayerProgress {
@@ -238,21 +188,5 @@ class PlayerMapper {
         2.toUByte() -> Difficulty.HARDCORE
         3.toUByte() -> Difficulty.JOURNEY
         else -> Difficulty.NONE
-    }
-
-    private fun mapCatalogItem(raw: RawItem, info: CatalogItem) = Item(
-        id = raw.id,
-        prefix = raw.prefix.toInt(),
-        name = info.name,
-        tags = info.itemTags,
-        itemUrl = info.itemUrl,
-        imageUrl = info.imageUrl,
-    )
-
-    private fun resolveItemById(catalog: ItemCatalog, raw: RawItem) = when {
-        raw.id == 0 -> ItemSlot.Empty
-        else -> catalog.getItemById(raw.id)
-            ?.let { info -> ItemSlot.Resolved(mapCatalogItem(raw, info)) }
-            ?: ItemSlot.UnknownById(raw.id)
     }
 }

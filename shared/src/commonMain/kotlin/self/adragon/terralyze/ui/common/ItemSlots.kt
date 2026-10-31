@@ -24,7 +24,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import self.adragon.terralyze.ui.hub.ItemImageCache
-import self.adragon.terralyze.ui.hub.storage.ItemUiState
+import self.adragon.terralyze.ui.hub.storage.ItemState
+import self.adragon.terralyze.ui.hub.storage.ResolvedItem
 
 @Composable
 fun ItemImage(name: String, url: String, modifier: Modifier = Modifier) {
@@ -37,22 +38,14 @@ fun ItemImage(name: String, url: String, modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun SlotGrid(
-    itemRows: List<List<ItemUiState>>, slotGap: Dp, slotSize: Dp, indexOffset: Int = 0,
-    onClick: (index: Int, itemState: ItemUiState) -> Unit = { _, _ -> }
-) = Column(verticalArrangement = Arrangement.spacedBy(slotGap)) {
-
-    itemRows.forEachIndexed { rowIndex, itemRow ->
-        Row(horizontalArrangement = Arrangement.spacedBy(slotGap)) {
-            itemRow.forEachIndexed { index, state ->
-                val currentIndex = indexOffset + index + rowIndex * itemRow.size
-                ItemOverview(state, slotGap, slotSize) {
-                    onClick(currentIndex, state)
-                }
+fun SlotGrid(itemRows: List<List<ResolvedItem>>, slotGap: Dp, slotSize: Dp) =
+    Column(verticalArrangement = Arrangement.spacedBy(slotGap)) {
+        itemRows.forEach { row ->
+            Row(horizontalArrangement = Arrangement.spacedBy(slotGap)) {
+                row.forEach { ItemOverview(it, slotGap, slotSize) }
             }
         }
     }
-}
 
 @Composable
 fun ItemSlotFrame(slotGap: Dp, slotSize: Dp, content: @Composable BoxScope.() -> Unit) = Box(
@@ -60,49 +53,40 @@ fun ItemSlotFrame(slotGap: Dp, slotSize: Dp, content: @Composable BoxScope.() ->
         .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(6.dp))
         .padding(slotGap),
     contentAlignment = Alignment.Center,
-    content = content,
+    content = content
 )
 
 @Composable
-fun ItemOverview(
-    itemState: ItemUiState, slotGap: Dp, slotSize: Dp,
-    onClick: () -> Unit
-) = ItemSlotFrame(slotGap, slotSize) {
-    when (itemState) {
-        ItemUiState.Empty -> Unit
-        is ItemUiState.Unknown -> UnknownItem(itemState.id, Modifier.align(Alignment.BottomEnd))
-        is ItemUiState.Filled -> FilledItem(itemState)
+fun ItemOverview(item: ResolvedItem, slotGap: Dp, slotSize: Dp) =
+    ItemSlotFrame(slotGap, slotSize) {
+        when (item.state) {
+            ItemState.EMPTY -> Unit
+            ItemState.UNKNOWN -> UnknownItem(item.item.id, Modifier.align(Alignment.BottomEnd))
+            ItemState.KNOWN -> FilledItem(item)
+        }
     }
-}
 
 @Composable
-fun UnknownItem(id: Int, modifier: Modifier = Modifier) =
-    CaptionText(id.toString(), modifier.padding(2.dp))
+fun UnknownItem(id: Int?, modifier: Modifier = Modifier) =
+    CaptionText("$id", modifier.padding(2.dp))
 
 @Composable
-fun FilledItem(itemState: ItemUiState.Filled) {
-    val name = itemState.item.name
-    val id = itemState.item.id
-    val stack = itemState.stack
+fun FilledItem(item: ResolvedItem) {
+    val name = item.catalogItem!!.name
+    val stack = item.item.stack
 
-    val favoritedStr = if (itemState.favorited) "{Favorite}" else ""
     Box(
-        Modifier.fillMaxSize()
-            .border(
-                width = 1.dp,
-                color = Color.Transparent,
-                shape = RoundedCornerShape(8.dp)
-            )
-            .then(
-                if (itemState.favorited) Modifier.wavyBorder(MaterialTheme.colorScheme.tertiary)
-                else Modifier
-            ),
+        Modifier.fillMaxSize().border(
+            width = 1.dp,
+            color = Color.Transparent,
+            shape = RoundedCornerShape(8.dp)
+        ).then(
+            if (item.item.favorite) Modifier.wavyBorder(MaterialTheme.colorScheme.tertiary)
+            else Modifier
+        ),
         Alignment.Center
     ) {
-        ItemImage(name, itemState.item.imageUrl)
-        if (stack > 1)
-            ValueText(
-                stack.toString(), Modifier.align(Alignment.BottomEnd).padding(2.dp)
-            )
+        ItemImage(name, item.catalogItem.imageUrl)
+        if (stack > 1) ValueText("$stack", Modifier.align(Alignment.BottomEnd).padding(2.dp))
     }
 }

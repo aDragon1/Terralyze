@@ -7,8 +7,9 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
+import self.adragon.terralyze.data.model.equipment.EquipmentSlot
+import self.adragon.terralyze.data.model.item.Item
 import self.adragon.terralyze.domain.model.Difficulty
-import self.adragon.terralyze.domain.model.ItemSlot
 import self.adragon.terralyze.domain.model.Player
 
 class PlayerEditorStateHolder(
@@ -25,7 +26,7 @@ class PlayerEditorStateHolder(
     fun onIntent(intent: PlayerEditorIntent) = when (intent) {
         is PlayerEditorIntent.Stats -> onStatsIntent(intent)
         is PlayerEditorIntent.Progress -> onProgressIntent(intent)
-        is PlayerEditorIntent.Storage -> {}
+        is PlayerEditorIntent.Storage -> onStorageIntent(intent)
         is PlayerEditorIntent.Research -> {}
         PlayerEditorIntent.ResetChanges -> {}
         PlayerEditorIntent.SavePlayer -> {}
@@ -91,6 +92,22 @@ class PlayerEditorStateHolder(
             )
         }
     }
+
+    private fun onStorageIntent(intent: PlayerEditorIntent.Storage) = when (intent) {
+        is PlayerEditorIntent.Storage.UpdateInventorySlot -> _editedPlayer.update {
+            it.copy(
+                playerStorage = it.playerStorage.copy(
+                    inventory = it.playerStorage.inventory
+                        .mapIndexed { i, item -> if (i == intent.index) intent.item else item })
+            )
+        }
+
+        is PlayerEditorIntent.Storage.UpdateEquipmentSlot -> _editedPlayer.update {
+            it.copy(
+                equipment = it.equipment.copy()
+            )
+        }
+    }
 }
 
 sealed interface PlayerEditorIntent {
@@ -113,8 +130,8 @@ sealed interface PlayerEditorIntent {
     }
 
     sealed interface Storage : PlayerEditorIntent {
-        data class UpdateInventorySlot(val index: Int, val item: ItemSlot) : Storage
-//        data class UpdateEquipmentSlot(val slotType: EquipmentType, val index: Int, val item: ItemSlot) : Storage
+        data class UpdateInventorySlot(val item: Item, val index: Int) : Storage
+        data class UpdateEquipmentSlot(val item: EquipmentSlot, val index: Int) : Storage
     }
 
     sealed interface Research : PlayerEditorIntent {

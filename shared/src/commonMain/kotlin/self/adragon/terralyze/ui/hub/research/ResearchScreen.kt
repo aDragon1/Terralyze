@@ -151,7 +151,7 @@ private fun ResearchHeader(
 @Composable
 fun ResearchItemCard(item: ResearchItemUiState.Identified, modifier: Modifier = Modifier) =
     AppCard(modifier) {
-        Column(Modifier.padding(10.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        Column(Modifier.padding(10.dp), Arrangement.spacedBy(10.dp)) {
             Row(Modifier.fillMaxWidth(), Arrangement.spacedBy(12.dp), Alignment.CenterVertically) {
                 ItemImage(item.catalogItem.name, item.catalogItem.imageUrl, Modifier.size(40.dp))
                 SecondaryText(
@@ -160,8 +160,8 @@ fun ResearchItemCard(item: ResearchItemUiState.Identified, modifier: Modifier = 
                 )
             }
             val label = if (item.isCompleted) "Completed" else "Not started"
-            val statColor =
-                if (item.isCompleted) MaterialTheme.colorScheme.tertiary else Color.Yellow
+            val statColor = if (item.isCompleted) MaterialTheme.colorScheme.tertiary
+            else Color.Yellow
             StatBar(label, item.amount, item.catalogItem.neededForResearch, statColor)
         }
     }
@@ -170,9 +170,7 @@ fun ResearchItemCard(item: ResearchItemUiState.Identified, modifier: Modifier = 
 private fun UnknownResearchItemCard(
     item: ResearchItemUiState.Unknown, modifier: Modifier = Modifier
 ) = AppCard(modifier) {
-    Column(
-        Modifier.fillMaxWidth().padding(12.dp), Arrangement.spacedBy(8.dp),
-    ) {
+    Column(Modifier.fillMaxWidth().padding(12.dp), Arrangement.spacedBy(8.dp)) {
         SecondaryText(item.internalName)
         CaptionText("Unknown item")
         SecondaryText("Amount: ${item.amount}")

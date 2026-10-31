@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Card
@@ -26,6 +27,7 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
@@ -332,6 +334,21 @@ fun HoverTooltip(hint: String, content: @Composable () -> Unit) {
         },
         tooltipState,
     ) { content() }
+}
+
+@Composable
+fun LabeledValue(name: String, value: String) = Surface(
+    Modifier.widthIn(min = 190.dp),
+    RoundedCornerShape(10.dp),
+    MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.55f),
+) {
+    Row(
+        Modifier.padding(12.dp, 8.dp),
+        Arrangement.spacedBy(12.dp), Alignment.CenterVertically,
+    ) {
+        SecondaryText(name, Modifier.weight(1f))
+        ValueText(value)
+    }
 }
 
 @Composable

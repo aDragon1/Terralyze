@@ -1,11 +1,11 @@
 package self.adragon.terralyze.data.model.equipment
 
 import kotlinx.serialization.Serializable
-import self.adragon.terralyze.data.model.item.EquipmentItem
+import self.adragon.terralyze.data.model.item.Item
 
 @Serializable
-data class EquipmentSlot<ItemType>(
-    val main: EquipmentItem<ItemType>,
-    val vanity: EquipmentItem<ItemType>,
-    val dye: EquipmentItem<ItemType>
+data class EquipmentSlot(
+    val main: Item,
+    val vanity: Item,
+    val dye: Item
 )

@@ -57,7 +57,10 @@ fun PlayerHub(player: Player, catalog: ItemCatalog) {
             rememberSaveableStateHolder().SaveableStateProvider(currentDestination.name) {
                 when (currentDestination) {
                     HubDestination.Overview -> OverviewScreen(playerEditorStateHolder)
-                    HubDestination.Storage -> StorageScreen(player)
+                    HubDestination.Storage -> StorageScreen(
+                        playerEditorStateHolder,
+                        catalog = catalog
+                    )
                     HubDestination.Researches -> ResearchScreen(player, catalog)
                 }
             }

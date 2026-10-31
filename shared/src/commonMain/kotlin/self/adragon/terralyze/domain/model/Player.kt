@@ -1,7 +1,6 @@
 package self.adragon.terralyze.domain.model
 
 import self.adragon.terralyze.data.model.equipment.Equipment
-import self.adragon.terralyze.data.model.item.InventoryItem
 import self.adragon.terralyze.data.model.player.Buff
 import self.adragon.terralyze.data.model.player.FileInfo
 import self.adragon.terralyze.data.model.player.SP
@@ -26,8 +25,7 @@ data class Player(
     val progress: PlayerProgress,
     val taxMoney: Int?,
 
-    val equipment: Equipment<ItemSlot>,
-    val inventory: List<InventoryItem<ItemSlot>>,
+    val equipment: Equipment,
     val playerStorage: PlayerStorage,
     val voidVaultInfo: Int?,
 

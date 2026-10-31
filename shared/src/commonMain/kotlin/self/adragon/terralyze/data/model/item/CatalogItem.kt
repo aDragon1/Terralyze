@@ -16,6 +16,7 @@ data class CatalogItem(
     val itemUrl: String,
     val imageUrl: String
 ) {
-    val itemTags: List<ItemTag> = rawTags
-        .flatMap { (category, names) -> names.map { name -> ItemTag(category, name) } }
+    val itemTags: List<ItemTag> = rawTags.flatMap { (category, names) ->
+        names.map { name -> ItemTag(category, name) }
+    }
 }

@@ -2,9 +2,7 @@ package self.adragon.terralyze.data.model.player
 
 import self.adragon.terralyze.data.model.ParsedFieldValue
 import self.adragon.terralyze.data.model.equipment.Equipment
-import self.adragon.terralyze.data.model.item.BankItem
-import self.adragon.terralyze.data.model.item.InventoryItem
-import self.adragon.terralyze.data.model.item.RawItem
+import self.adragon.terralyze.data.model.item.Item
 
 data class ParsedPlayer(
     val metadata: FileInfo,
@@ -43,13 +41,13 @@ data class ParsedPlayer(
     val numberOfDeathsPVP: ParsedFieldValue<Int>,
 
     val colors: PlayerColors,
-    val equipment: Equipment<RawItem>,
-    val inventory: List<InventoryItem<RawItem>>,
+    val equipment: Equipment,
+    val inventory: List<Item>,
 
-    val piggyBank: List<BankItem<RawItem>>,
-    val safe: List<BankItem<RawItem>>,
-    val defendersForge: ParsedFieldValue<List<BankItem<RawItem>>>,
-    val voidVault: ParsedFieldValue<List<InventoryItem<RawItem>>>,
+    val piggyBank: List<Item>,
+    val safe: List<Item>,
+    val defendersForge: ParsedFieldValue<List<Item>>,
+    val voidVault: ParsedFieldValue<List<Item>>,
     val voidVaultInfo: ParsedFieldValue<UByte>,
 
     val buffs: ParsedFieldValue<List<Buff>>,

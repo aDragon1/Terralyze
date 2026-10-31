@@ -7,10 +7,7 @@ import self.adragon.terralyze.data.model.equipment.Equipment
 import self.adragon.terralyze.data.model.equipment.EquipmentSlot
 import self.adragon.terralyze.data.model.equipment.MiscEquipmentSlot
 import self.adragon.terralyze.data.model.getOrNull
-import self.adragon.terralyze.data.model.item.BankItem
-import self.adragon.terralyze.data.model.item.EquipmentItem
-import self.adragon.terralyze.data.model.item.InventoryItem
-import self.adragon.terralyze.data.model.item.RawItem
+import self.adragon.terralyze.data.model.item.Item
 import self.adragon.terralyze.data.model.player.Buff
 import self.adragon.terralyze.data.model.player.ParsedPlayer
 import self.adragon.terralyze.data.model.player.PlayerColors
@@ -93,19 +90,19 @@ class PlayerParser {
         )
 
         val armor =
-            List(spec.armorSize) { readEquipmentItem(reader, spec.isArmorFavoritedAvailable) }
+            List(spec.armorSize) { readEquipmentItem(reader, spec.isArmorfavoriteAvailable) }
         val accessories =
-            List(spec.accessoriesSize) { readEquipmentItem(reader, spec.isArmorFavoritedAvailable) }
+            List(spec.accessoriesSize) { readEquipmentItem(reader, spec.isArmorfavoriteAvailable) }
         val vanityArmor =
-            List(spec.armorSize) { readEquipmentItem(reader, spec.isArmorFavoritedAvailable) }
+            List(spec.armorSize) { readEquipmentItem(reader, spec.isArmorfavoriteAvailable) }
         val vanityAccessories =
-            List(spec.accessoriesSize) { readEquipmentItem(reader, spec.isArmorFavoritedAvailable) }
-        val dye = List(spec.dyeSize) { readEquipmentItem(reader, spec.isArmorFavoritedAvailable) }
+            List(spec.accessoriesSize) { readEquipmentItem(reader, spec.isArmorfavoriteAvailable) }
+        val dye = List(spec.dyeSize) { readEquipmentItem(reader, spec.isArmorfavoriteAvailable) }
 
         val inventory = List(spec.inventorySize) {
             readInventoryItem(
                 reader,
-                spec.isInventoryFavoritedAvailable
+                spec.isInventoryfavoriteAvailable
             )
         }
 
@@ -323,55 +320,46 @@ class PlayerParser {
         when (format) {
             MiscEquipmentsFormat.ABSENT -> emptyList()
             MiscEquipmentsFormat.IGNORE_INDEX_ONE -> List(5) {
-                if (it == 1) MiscEquipmentSlot(RawItem(-1, 1.toUByte()), RawItem(-1, 1.toUByte()))
+                if (it == 1) MiscEquipmentSlot(Item(-1, 1), Item(-1, 1))
                 else readMiscEquipmentSlot(reader)
             }
 
             MiscEquipmentsFormat.NORMAL -> List(5) { readMiscEquipmentSlot(reader) }
         }
 
-    private fun readEquipmentItem(
-        reader: BinaryReader,
-        favoritedAvailable: Boolean
-    ): EquipmentItem<RawItem> {
+    private fun readEquipmentItem(reader: BinaryReader, favoriteAvailable: Boolean): Item {
         val id = reader.readS4()
-        val prefix = reader.readU1()
-        val favorited = favoritedAvailable && reader.readBoolean()
+        val prefix = reader.readU1().toInt()
+        val favorite = favoriteAvailable && reader.readBoolean()
 
-        return EquipmentItem(RawItem(id, prefix), favorited)
+        return Item(id, prefix, 1, favorite)
     }
 
-    private fun readMiscEquipmentSlot(reader: BinaryReader): MiscEquipmentSlot<RawItem> {
+    private fun readMiscEquipmentSlot(reader: BinaryReader): MiscEquipmentSlot {
         val id = reader.readS4()
-        val prefix = reader.readU1()
+        val prefix = reader.readU1().toInt()
 
         val dyeId = reader.readS4()
-        val dyePrefix = reader.readU1()
+        val dyePrefix = reader.readU1().toInt()
 
-        return MiscEquipmentSlot(
-            RawItem(id, prefix),
-            RawItem(dyeId, dyePrefix)
-        )
+        return MiscEquipmentSlot(Item(id, prefix), Item(dyeId, dyePrefix))
     }
 
-    private fun readInventoryItem(
-        reader: BinaryReader,
-        favoritedAvailable: Boolean
-    ): InventoryItem<RawItem> {
+    private fun readInventoryItem(reader: BinaryReader, favoriteAvailable: Boolean): Item {
         val id = reader.readS4()
         val stack = reader.readS4()
-        val prefix = reader.readU1()
-        val favorited = favoritedAvailable && reader.readBoolean()
+        val prefix = reader.readU1().toInt()
+        val favorite = favoriteAvailable && reader.readBoolean()
 
-        return InventoryItem(RawItem(id, prefix), stack, favorited)
+        return Item(id, prefix, stack, favorite)
     }
 
-    private fun readBankItem(reader: BinaryReader): BankItem<RawItem> {
+    private fun readBankItem(reader: BinaryReader): Item {
         val id = reader.readS4()
         val stack = reader.readS4()
-        val prefix = reader.readU1()
+        val prefix = reader.readU1().toInt()
 
-        return BankItem(RawItem(id, prefix), stack)
+        return Item(id, prefix, stack)
     }
 
     private fun readColor(reader: BinaryReader): PlayerColor {
