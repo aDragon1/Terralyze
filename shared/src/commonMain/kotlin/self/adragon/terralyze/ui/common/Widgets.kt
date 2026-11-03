@@ -4,12 +4,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.hoverable
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsHoveredAsState
-import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,12 +12,9 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -33,18 +25,14 @@ import androidx.compose.material3.FilterChip
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TextField
 import androidx.compose.material3.TooltipAnchorPosition
 import androidx.compose.material3.TooltipBox
 import androidx.compose.material3.TooltipDefaults
 import androidx.compose.material3.rememberTooltipState
-import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -53,21 +41,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.key.Key
-import androidx.compose.ui.input.key.KeyEventType
-import androidx.compose.ui.input.key.key
-import androidx.compose.ui.input.key.onPreviewKeyEvent
-import androidx.compose.ui.input.key.type
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Popup
-import androidx.compose.ui.window.PopupProperties
 import kotlin.math.round
 
 @Composable
@@ -77,305 +55,6 @@ fun AppCard(modifier: Modifier = Modifier, content: @Composable () -> Unit) = Ca
 //    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
     border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
 ) { content() }
-
-@Composable
-fun EditableContainer(
-    onClick: () -> Unit, modifier: Modifier = Modifier, isEditing: Boolean = false,
-    enabled: Boolean = true, content: @Composable () -> Unit,
-) {
-    val interactionSource = remember { MutableInteractionSource() }
-    val isHovered by interactionSource.collectIsHoveredAsState()
-    val isPressed by interactionSource.collectIsPressedAsState()
-
-    val isHighlighted = isEditing || isHovered || isPressed
-
-    Box(
-        modifier.hoverable(interactionSource = interactionSource, enabled = enabled).clickable(
-            interactionSource, ripple(), enabled,
-            onClick = onClick,
-        ).border(
-            1.dp, if (isHighlighted) Color.Yellow else Color.Transparent,
-            RoundedCornerShape(8.dp),
-        )
-    ) { content() }
-}
-
-@Composable
-fun <T> InlineValueEditor(
-    value: T, modifier: Modifier = Modifier, content: @Composable (T) -> Unit, onSave: (T) -> Unit,
-    editor: @Composable (value: T, onDone: (T) -> Unit, onCancel: () -> Unit) -> Unit,
-) = Box(modifier) {
-    var isEditing by remember { mutableStateOf(false) }
-
-    EditableContainer(isEditing = isEditing, onClick = { isEditing = true }) { content(value) }
-
-    if (isEditing)
-        Popup(
-            onDismissRequest = { isEditing = false },
-            properties = PopupProperties(
-                focusable = true,
-                dismissOnBackPress = true,
-                dismissOnClickOutside = true
-            )
-        ) {
-            Surface(
-                Modifier.padding(top = 4.dp).widthIn(min = 200.dp, max = 320.dp),
-                RoundedCornerShape(12.dp), MaterialTheme.colorScheme.surfaceContainerHigh,
-                tonalElevation = 6.dp, shadowElevation = 8.dp,
-                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
-            ) {
-                Box(Modifier.padding(12.dp)) {
-                    editor(
-                        value, { onSave(it); isEditing = false },
-                        { isEditing = false }
-                    )
-                }
-            }
-        }
-}
-
-@Composable
-fun InlineTextEditor(
-    value: String, content: @Composable (value: String) -> Unit,
-    onSave: (String) -> Unit, modifier: Modifier = Modifier
-) = InlineValueEditor(
-    value, modifier, content, onSave, { initialValue, save, cancel ->
-        var draft by remember(initialValue) { mutableStateOf(initialValue) }
-        Column {
-            val focus = remember { FocusRequester() }
-            LaunchedEffect(Unit) { focus.requestFocus() }
-
-            EditorTextField(
-                draft, { draft = it },
-                modifier = Modifier.focusRequester(focus).onPreviewKeyEvent { event ->
-                    if (event.type != KeyEventType.KeyUp) return@onPreviewKeyEvent false
-                    when (event.key) {
-                        Key.Enter -> {
-                            save(draft)
-                            true
-                        }
-
-                        Key.Escape -> {
-                            cancel()
-                            true
-                        }
-
-                        else -> false
-                    }
-                }
-            )
-            Row {
-                TextButton(onClick = cancel) { SecondaryText("Cancel") }
-                TextButton(onClick = { save(draft) }) { SecondaryText("Save") }
-            }
-        }
-    }
-)
-
-@Composable
-fun InlineIntEditor(
-    value: Int, content: @Composable (Int) -> Unit, onSave: (Int) -> Unit,
-    modifier: Modifier = Modifier, placeholder: String = ""
-) = InlineValueEditor(
-    value, modifier, content, onSave,
-    { initialValue, save, cancel ->
-        var draft by remember(initialValue) { mutableStateOf(initialValue.toString()) }
-
-        Column {
-            val focus = remember { FocusRequester() }
-            LaunchedEffect(Unit) { focus.requestFocus() }
-
-            EditorTextField(
-                draft, { input -> draft = input }, placeholder = placeholder,
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                modifier = Modifier.focusRequester(focus).onPreviewKeyEvent { event ->
-                    if (event.type != KeyEventType.KeyUp) return@onPreviewKeyEvent false
-                    when (event.key) {
-                        Key.Enter -> {
-                            draft.toIntOrNull()?.let(save)
-                            true
-                        }
-
-                        Key.Escape -> {
-                            cancel()
-                            true
-                        }
-
-                        else -> false
-                    }
-                }
-            )
-
-            Row {
-                TextButton(onClick = cancel) { SecondaryText("Cancel") }
-                TextButton(
-                    enabled = draft.toIntOrNull() != null,
-                    onClick = { draft.toIntOrNull()?.let(save) }
-                ) { SecondaryText("Save") }
-            }
-        }
-    }
-)
-
-@Composable
-fun <T> InlineDropdown(
-    value: T, items: List<T>, content: @Composable (T) -> Unit, itemLabel: (T) -> String,
-    onSave: (T) -> Unit, modifier: Modifier = Modifier
-) = Box(modifier) {
-    var expanded by remember { mutableStateOf(false) }
-    var searchQuery by remember { mutableStateOf("") }
-
-    EditableContainer(isEditing = expanded, onClick = { expanded = true }) {
-        content(value)
-    }
-    val filteredItems = remember(items, searchQuery) {
-        if (searchQuery.isNotBlank()) items.filter { itemLabel(it).contains(searchQuery, true) }
-        else items
-    }
-
-    if (expanded)
-        Popup(
-            onDismissRequest = { expanded = false; searchQuery = "" },
-            properties = PopupProperties(
-                focusable = true,
-                dismissOnClickOutside = true,
-                dismissOnBackPress = true
-            )
-        ) {
-            LazyColumn(
-                Modifier.widthIn(190.dp, 280.dp).heightIn(max = 300.dp).background(
-                    MaterialTheme.colorScheme.surface,
-                    RoundedCornerShape(8.dp)
-                )
-            ) {
-                item {
-                    SearchTextField(
-                        searchQuery, { searchQuery = it },
-                        Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp),
-                    )
-                }
-                items(filteredItems) {
-                    DropdownMenuItem(
-                        { Text(itemLabel(it)) },
-                        { onSave(it); expanded = false; searchQuery = "" }
-                    )
-                }
-            }
-        }
-}
-
-
-@Composable
-fun InlineCurrentMaxEditor(
-    current: Int, maximum: Int, label: String, color: Color,
-    onSave: (current: Int, maximum: Int) -> Unit, modifier: Modifier = Modifier,
-) = InlineValueEditor(
-    Pair(current, maximum), modifier, { StatBar(label, it.first, it.second, color) },
-    { updated -> onSave(updated.first, updated.second) },
-) { initialValue, save, cancel ->
-    var currentDraft by remember(initialValue) { mutableStateOf("${initialValue.first}") }
-    var maximumDraft by remember(initialValue) { mutableStateOf("${initialValue.second}") }
-
-    val parsedCurrent = currentDraft.toIntOrNull()
-    val parsedMaximum = maximumDraft.toIntOrNull()
-    val isValid = parsedCurrent != null && parsedMaximum != null && parsedMaximum >= 0
-
-    val currentFocus = remember { FocusRequester() }
-    val maximumFocus = remember { FocusRequester() }
-    LaunchedEffect(Unit) { currentFocus.requestFocus() }
-
-    Column(
-        modifier = Modifier.padding(top = 8.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-    ) {
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            Column(Modifier.weight(1f)) {
-                CaptionText("Current")
-                EditorTextField(
-                    currentDraft, { currentDraft = it },
-                    Modifier.fillMaxWidth().focusRequester(currentFocus).onPreviewKeyEvent {
-                        if (it.type == KeyEventType.KeyUp && it.key == Key.Enter) {
-                            maximumFocus.requestFocus()
-                            true
-                        } else false
-                    },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-                )
-            }
-
-            Column(Modifier.weight(1f)) {
-                CaptionText("Maximum")
-                EditorTextField(
-                    maximumDraft, { maximumDraft = it },
-                    Modifier.fillMaxWidth().focusRequester(maximumFocus).onPreviewKeyEvent {
-                        if (it.type != KeyEventType.KeyUp) return@onPreviewKeyEvent false
-
-                        when (it.key) {
-                            Key.Enter -> {
-                                if (isValid) save(parsedCurrent to parsedMaximum)
-                                true
-                            }
-
-                            Key.Escape -> {
-                                cancel()
-                                true
-                            }
-
-                            else -> false
-                        }
-                    },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-                )
-            }
-        }
-        Row {
-            TextButton(onClick = cancel) { SecondaryText("Cancel") }
-            TextButton(
-                enabled = isValid, onClick = { save(Pair(parsedCurrent!!, parsedMaximum!!)) },
-            ) { SecondaryText("Save") }
-        }
-    }
-}
-
-@Composable
-fun InlineSlider(
-    value: Int, content: @Composable (value: Int) -> Unit, onSave: (Int) -> Unit,
-    modifier: Modifier = Modifier
-) = InlineValueEditor(
-    value, modifier, content, onSave, { initialValue, save, cancel ->
-        var draft by remember(initialValue) { mutableStateOf(initialValue) }
-        Column {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Slider(
-                    draft.toFloat(), onValueChange = { draft = it.toInt() },
-                    valueRange = 0f..999f, steps = 99, modifier = Modifier.weight(1f)
-                )
-                ValueText("$draft", modifier = Modifier.weight(1f))
-            }
-            Row {
-                TextButton(onClick = cancel) { SecondaryText("Cancel") }
-                TextButton(onClick = { save(draft) }) { SecondaryText("Save") }
-            }
-        }
-    }
-)
-
-@Composable
-fun EditorTextField(
-    value: String, onValueChange: (String) -> Unit, modifier: Modifier = Modifier,
-    placeholder: String = "", keyboardOptions: KeyboardOptions = KeyboardOptions.Default
-) = TextField(
-    value,
-    onValueChange,
-    modifier,
-    placeholder = { CaptionText(placeholder) },
-    singleLine = true,
-    keyboardOptions = keyboardOptions
-)
 
 @Composable
 fun HoverTooltip(hint: String, content: @Composable () -> Unit) {
@@ -406,11 +85,12 @@ fun SearchTextField(
     value: String, onValueChange: (String) -> Unit,
     modifier: Modifier = Modifier,
     placeholder: String = "Search...",
+    keyboardOptions: KeyboardOptions = KeyboardOptions()
 ) = OutlinedTextField(
-    value, onValueChange, modifier, placeholder = { Text(placeholder) },
+    value, onValueChange, modifier, placeholder = { CaptionText(placeholder) },
     leadingIcon = { Text("⌕") }, trailingIcon = {
         if (value.isNotEmpty()) IconButton(onClick = { onValueChange("") }) { Text("×") }
-    }, singleLine = true
+    }, singleLine = true, keyboardOptions = keyboardOptions
 )
 
 @Composable

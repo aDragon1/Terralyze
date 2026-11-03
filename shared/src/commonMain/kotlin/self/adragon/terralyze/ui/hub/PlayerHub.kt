@@ -41,7 +41,8 @@ enum class HubDestination { Overview, Storage, Researches, }
 @Composable
 fun PlayerHub(player: Player, catalog: ItemCatalog) {
     val scope = rememberCoroutineScope()
-    val playerEditorStateHolder = remember(player) { PlayerEditorStateHolder(player, scope) }
+    val playerEditorStateHolder =
+        remember(player) { PlayerEditorStateHolder(player, catalog, scope) }
 
     var currentDestination by rememberSaveable { mutableStateOf(HubDestination.Overview) }
     val destinations = buildList {
@@ -71,7 +72,7 @@ fun PlayerHub(player: Player, catalog: ItemCatalog) {
                     HubDestination.Overview -> OverviewScreen(playerEditorStateHolder)
                     HubDestination.Storage -> StorageScreen(playerEditorStateHolder, catalog)
 
-                    HubDestination.Researches -> ResearchScreen(player, catalog)
+                    HubDestination.Researches -> ResearchScreen(playerEditorStateHolder, catalog)
                 }
             }
             FloatingCard(hasUnsavedChanges, Modifier.fillMaxWidth(), Alignment.BottomEnd) {

@@ -22,8 +22,11 @@ sealed interface ResearchItemUiState {
         override val amount: Int = 0
     }
 
-    data class InProgress(override val catalogItem: CatalogItem, override val amount: Int) : Identified
-    data class Completed(override val catalogItem: CatalogItem, override val amount: Int) : Identified
+    data class InProgress(override val catalogItem: CatalogItem, override val amount: Int) :
+        Identified
+
+    data class Completed(override val catalogItem: CatalogItem, override val amount: Int) :
+        Identified
 }
 
 fun buildResearchUiState(
@@ -51,11 +54,10 @@ fun ResearchItem.toUiState(): ResearchItemUiState {
     if (catalogItem == null) return ResearchItemUiState.Unknown(internalName, amount)
 
     return when {
+        amount >= catalogItem.neededForResearch ->
+            ResearchItemUiState.Completed(catalogItem, amount)
+
         amount <= 0 -> ResearchItemUiState.NotStarted(catalogItem)
-        amount >= catalogItem.neededForResearch -> ResearchItemUiState.Completed(
-            catalogItem,
-            amount
-        )
 
         else -> ResearchItemUiState.InProgress(catalogItem, amount)
     }

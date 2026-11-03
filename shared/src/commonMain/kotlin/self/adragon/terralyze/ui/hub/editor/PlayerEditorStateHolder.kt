@@ -9,13 +9,16 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import self.adragon.terralyze.data.model.equipment.Equipment
 import self.adragon.terralyze.data.model.equipment.EquipmentSlot
+import self.adragon.terralyze.data.model.item.CatalogItem
 import self.adragon.terralyze.data.model.item.Item
+import self.adragon.terralyze.data.repository.ItemCatalog
 import self.adragon.terralyze.domain.model.Difficulty
 import self.adragon.terralyze.domain.model.Player
+import self.adragon.terralyze.domain.model.ResearchItem
+import terralyze.shared.generated.resources.Res
 
 class PlayerEditorStateHolder(
-    val initialPlayer: Player,
-    scope: CoroutineScope
+    val initialPlayer: Player, val catalog: ItemCatalog, scope: CoroutineScope
     // savePlayerUseCase
 ) {
     private val _editedPlayer = MutableStateFlow(initialPlayer)
@@ -28,7 +31,7 @@ class PlayerEditorStateHolder(
         is PlayerEditorIntent.Stats -> onStatsIntent(intent)
         is PlayerEditorIntent.Progress -> onProgressIntent(intent)
         is PlayerEditorIntent.Storage -> onStorageIntent(intent)
-        is PlayerEditorIntent.Research -> {}
+        is PlayerEditorIntent.Research -> onResearchIntent(intent)
         PlayerEditorIntent.ResetChanges -> {
             _editedPlayer.value = initialPlayer
         }
@@ -102,6 +105,32 @@ class PlayerEditorStateHolder(
             _editedPlayer.update { player ->
                 updateSlot(player, intent.item, intent.location)
             }
+        }
+    }
+
+    private fun onResearchIntent(intent: PlayerEditorIntent.Research) = when (intent) {
+        is PlayerEditorIntent.Research.SetAmount -> _editedPlayer.update { player ->
+            val currentEntries = player.researchEntries ?: emptyList()
+            val exists = currentEntries.any { it.internalName == intent.internalName }
+
+            val catalogItem = catalog.getItemByInternalName(intent.internalName)
+            val updatedEntries = if (exists) currentEntries.map {
+                if (it.internalName == intent.internalName) it.copy(amount = intent.amount) else it
+            } else currentEntries + ResearchItem(intent.internalName, intent.amount, catalogItem)
+
+            player.copy(researchEntries = updatedEntries)
+        }
+
+        is PlayerEditorIntent.Research.ResearchAll -> _editedPlayer.update {
+            it.copy(researchEntries = catalog.getAllItems().map { catalogItem ->
+                ResearchItem(catalogItem.internalName, catalogItem.neededForResearch, catalogItem)
+            })
+        }
+
+        is PlayerEditorIntent.Research.ResetAll -> _editedPlayer.update {
+            it.copy(researchEntries = it.researchEntries?.map { entry ->
+                entry.copy(amount = 0)
+            })
         }
     }
 
@@ -221,8 +250,11 @@ sealed interface PlayerEditorIntent {
     }
 
     sealed interface Research : PlayerEditorIntent {
-        data class SetAmount(val internalName: String, val amount: Int) : Research
+        data class SetAmount(val internalName: String, val amount: Int) :
+            Research
+
         data object ResearchAll : Research
+        data object ResetAll : Research
     }
 
     data object ResetChanges : PlayerEditorIntent

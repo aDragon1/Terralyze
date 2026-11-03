@@ -11,8 +11,11 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -24,15 +27,18 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import self.adragon.terralyze.data.repository.ItemCatalog
 import self.adragon.terralyze.domain.model.ItemTag
-import self.adragon.terralyze.domain.model.Player
 import self.adragon.terralyze.ui.common.AppCard
 import self.adragon.terralyze.ui.common.CaptionText
 import self.adragon.terralyze.ui.common.FilterChipRow
 import self.adragon.terralyze.ui.common.GroupedDropDown
+import self.adragon.terralyze.ui.common.InlineSlider
 import self.adragon.terralyze.ui.common.ItemImage
 import self.adragon.terralyze.ui.common.SearchTextField
 import self.adragon.terralyze.ui.common.SecondaryText
 import self.adragon.terralyze.ui.common.StatBar
+import self.adragon.terralyze.ui.common.ValueText
+import self.adragon.terralyze.ui.hub.editor.PlayerEditorIntent
+import self.adragon.terralyze.ui.hub.editor.PlayerEditorStateHolder
 
 /*
     Also ~~stole~~ took heavy inspiration from the UI of https://terraria-research-tracker.free.nf
@@ -78,11 +84,15 @@ private fun ResearchItemUiState.matchesFilters(
 }
 
 @Composable
-fun ResearchScreen(player: Player, catalog: ItemCatalog, modifier: Modifier = Modifier) {
-    val entries = player.researchEntries!! // Just to shut up the warning
+fun ResearchScreen(
+    playerEditor: PlayerEditorStateHolder,
+    catalog: ItemCatalog,
+    modifier: Modifier = Modifier
+) {
+    val player by playerEditor.editedPlayer.collectAsState()
 
-    val researchItems = remember(catalog, entries) {
-        buildResearchUiState(catalog.getAllItems(), entries)
+    val researchItems = remember(catalog, player.researchEntries) {
+        buildResearchUiState(catalog.getAllItems(), player.researchEntries)
     }
     val tags = remember(catalog) { catalog.getAllTags() }
 
@@ -96,7 +106,8 @@ fun ResearchScreen(player: Player, catalog: ItemCatalog, modifier: Modifier = Mo
     Column(modifier.fillMaxSize().padding(16.dp), Arrangement.spacedBy(12.dp)) {
         ResearchHeader(
             filteredItems, searchQuery, selectedFilter, selectedTag, tags,
-            { searchQuery = it }, { selectedFilter = it }, { selectedTag = it }
+            { searchQuery = it }, { selectedFilter = it }, { selectedTag = it },
+            playerEditor::onIntent
         )
 
         LazyVerticalGrid(
@@ -105,10 +116,13 @@ fun ResearchScreen(player: Player, catalog: ItemCatalog, modifier: Modifier = Mo
             verticalArrangement = Arrangement.spacedBy(8.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            items(filteredItems) {
-                when (it) {
-                    is ResearchItemUiState.Unknown -> UnknownResearchItemCard(it)
-                    is ResearchItemUiState.Identified -> ResearchItemCard(it)
+            items(filteredItems) { item ->
+                when (item) {
+                    is ResearchItemUiState.Unknown ->
+                        UnknownResearchItemCard(item)
+
+                    is ResearchItemUiState.Identified ->
+                        ResearchItemCard(item, playerEditor::onIntent)
                 }
             }
         }
@@ -120,9 +134,10 @@ private fun ResearchHeader(
     items: List<ResearchItemUiState>, searchQuery: String, filterSelected: ResearchFilter,
     tagSelection: ItemTag?, tags: List<ItemTag>, onSearchQueryChange: (String) -> Unit,
     onFilterSelect: (ResearchFilter) -> Unit, onTagSelect: (ItemTag?) -> Unit,
-    modifier: Modifier = Modifier
+    onIntent: (PlayerEditorIntent) -> Unit, modifier: Modifier = Modifier
 ) = AppCard(modifier.fillMaxWidth()) {
-    val completedCount = items.count { it is ResearchItemUiState.Identified && it.isCompleted }
+    val completedCount =
+        remember(items) { items.count { it is ResearchItemUiState.Identified && it.isCompleted } }
     val total = items.size
 
     Column(Modifier.padding(16.dp), Arrangement.spacedBy(12.dp)) {
@@ -137,19 +152,71 @@ private fun ResearchHeader(
                 { it?.category ?: "ALL" }, { it?.name ?: "All tags" }
             )
         }
-        FilterChipRow(
-            filterSelected, ResearchFilter.entries, onFilterSelect, { it.title },
-        )
+        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            FilterChipRow(
+                filterSelected, ResearchFilter.entries, onFilterSelect,
+                { it.title }, modifier = Modifier.weight(1f)
+            )
 
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                var showResetConfirmation by remember { mutableStateOf(false) }
+
+                TextButton(onClick = { showResetConfirmation = true }) {
+                    ValueText("Reset All")
+                }
+
+                TextButton(onClick = { onIntent(PlayerEditorIntent.Research.ResearchAll) }) {
+                    ValueText("Research All")
+                }
+
+                if (showResetConfirmation)
+                    AlertDialog(
+                        onDismissRequest = { showResetConfirmation = false },
+                        title = { ValueText("Reset research?") },
+                        text = {
+                            ValueText("This will reset all research progress. This action cannot be undone.")
+                        },
+                        confirmButton = {
+                            TextButton(
+                                onClick = {
+                                    onIntent(PlayerEditorIntent.Research.ResetAll)
+                                    showResetConfirmation = false
+                                }
+                            ) {
+                                ValueText("Reset")
+                            }
+                        },
+                        dismissButton = {
+                            TextButton(onClick = { showResetConfirmation = false }) {
+                                ValueText("Cancel")
+                            }
+                        }
+                    )
+            }
+        }
     }
 }
 
+
 @Composable
-fun ResearchItemCard(item: ResearchItemUiState.Identified, modifier: Modifier = Modifier) =
+fun ResearchItemCard(
+    item: ResearchItemUiState.Identified, onIntent: (PlayerEditorIntent) -> Unit,
+    modifier: Modifier = Modifier
+) = InlineSlider(item.amount, item.catalogItem.neededForResearch, onSave = {
+    onIntent(PlayerEditorIntent.Research.SetAmount(item.catalogItem.internalName, it))
+}, content = {
     AppCard(modifier) {
         Column(Modifier.padding(10.dp), Arrangement.spacedBy(10.dp)) {
-            Row(Modifier.fillMaxWidth(), Arrangement.spacedBy(12.dp), Alignment.CenterVertically) {
-                ItemImage(item.catalogItem.name, item.catalogItem.imageUrl, Modifier.size(40.dp))
+            Row(
+                Modifier.fillMaxWidth(),
+                Arrangement.spacedBy(12.dp),
+                Alignment.CenterVertically
+            ) {
+                ItemImage(
+                    item.catalogItem.name,
+                    item.catalogItem.imageUrl,
+                    Modifier.size(40.dp)
+                )
                 SecondaryText(
                     "${item.catalogItem.name}\nID: ${item.catalogItem.id}",
                     minLines = 3
@@ -161,6 +228,7 @@ fun ResearchItemCard(item: ResearchItemUiState.Identified, modifier: Modifier = 
             StatBar(label, item.amount, item.catalogItem.neededForResearch, statColor)
         }
     }
+})
 
 @Composable
 private fun UnknownResearchItemCard(
