@@ -12,7 +12,7 @@ data class PLRFormatSpec(
     val isUnlockedBiomeTorchesAvailable: Boolean,
     val isUsingBiomeTorchesAvailable: Boolean,
     val isAteArtisanBreadAvailable: Boolean,
-    val isShimmerAvaliable: Boolean,
+    val isShimmerAvailable: Boolean,
     val isDownedDD2EventAnyDifficultyAvailable: Boolean,
     val isTaxMoneyAvailable: Boolean,
     val isNumberOfDeathsAvailable: Boolean,

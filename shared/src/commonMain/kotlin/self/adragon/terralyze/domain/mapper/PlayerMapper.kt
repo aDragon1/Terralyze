@@ -128,7 +128,7 @@ class PlayerMapper {
             Triple(
                 "AegisCrystal",
                 "Increases the character's health regeneration by 20%.",
-                parsed.aegisCrystall
+                parsed.aegisCrystal
             ),
             Triple(
                 "ArcaneCrystal",

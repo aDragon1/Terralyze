@@ -1,4 +1,4 @@
-package self.adragon.terralyze.ui.hub
+package self.adragon.terralyze.ui.hub.editor
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
+import self.adragon.terralyze.data.model.equipment.Equipment
 import self.adragon.terralyze.data.model.equipment.EquipmentSlot
 import self.adragon.terralyze.data.model.item.Item
 import self.adragon.terralyze.domain.model.Difficulty
@@ -28,7 +29,10 @@ class PlayerEditorStateHolder(
         is PlayerEditorIntent.Progress -> onProgressIntent(intent)
         is PlayerEditorIntent.Storage -> onStorageIntent(intent)
         is PlayerEditorIntent.Research -> {}
-        PlayerEditorIntent.ResetChanges -> {}
+        PlayerEditorIntent.ResetChanges -> {
+            _editedPlayer.value = initialPlayer
+        }
+
         PlayerEditorIntent.SavePlayer -> {}
     }
 
@@ -94,17 +98,100 @@ class PlayerEditorStateHolder(
     }
 
     private fun onStorageIntent(intent: PlayerEditorIntent.Storage) = when (intent) {
-        is PlayerEditorIntent.Storage.UpdateInventorySlot -> _editedPlayer.update {
-            it.copy(
-                playerStorage = it.playerStorage.copy(
-                    inventory = it.playerStorage.inventory
-                        .mapIndexed { i, item -> if (i == intent.index) intent.item else item })
+        is PlayerEditorIntent.Storage.UpdateSlot -> {
+            _editedPlayer.update { player ->
+                updateSlot(player, intent.item, intent.location)
+            }
+        }
+    }
+
+    private fun updateSlot(player: Player, updatedItem: Item, location: SlotLocation): Player {
+        fun <T> List<T>.replaceAt(value: T, index: Int) = if (index in indices)
+            mapIndexed { i, v -> if (i == index) value else v } else this
+
+        return when (location) {
+            is SlotLocation.StorageLocation -> {
+                when (location.type) {
+                    StorageType.INVENTORY -> player.copy(
+                        playerStorage = player.playerStorage.copy(
+                            inventory = player.playerStorage.inventory
+                                .replaceAt(updatedItem, location.index)
+                        )
+                    )
+
+
+                    StorageType.PIGGY_BANK -> player.copy(
+                        playerStorage = player.playerStorage.copy(
+                            piggyBank = player.playerStorage.piggyBank
+                                .replaceAt(updatedItem, location.index)
+                        )
+                    )
+
+
+                    StorageType.SAFE -> player.copy(
+                        playerStorage = player.playerStorage.copy(
+                            safe = player.playerStorage.safe
+                                .replaceAt(updatedItem, location.index)
+                        )
+                    )
+
+
+                    StorageType.DEFENDERS_FORGE -> {
+                        val forge = player.playerStorage.defendersForge
+                            ?: return player
+
+                        player.copy(
+                            playerStorage = player.playerStorage.copy(
+                                defendersForge = forge.replaceAt(updatedItem, location.index)
+                            )
+                        )
+                    }
+
+                    StorageType.VOID_VAULT -> {
+                        val vault = player.playerStorage.voidVault
+                            ?: return player
+
+                        player.copy(
+                            playerStorage = player.playerStorage.copy(
+                                voidVault = vault.replaceAt(updatedItem, location.index)
+                            )
+                        )
+                    }
+                }
+            }
+
+            is SlotLocation.EquipmentLocation -> player.copy(
+                equipment = player.equipment
+                    .updateSlot(location.type, location.part, updatedItem, location.index)
             )
         }
+    }
 
-        is PlayerEditorIntent.Storage.UpdateEquipmentSlot -> _editedPlayer.update {
-            it.copy(
-                equipment = it.equipment.copy()
+    fun Equipment.updateSlot(
+        type: EquipmentType, part: EquipmentPart, item: Item, index: Int,
+    ): Equipment {
+        fun <T> List<T>.updateAt(index: Int, transform: (T) -> T) =
+            if (index in indices) mapIndexed { i, v -> if (i == index) transform(v) else v } else this
+
+        fun EquipmentSlot.updatePart(part: EquipmentPart, item: Item) = when (part) {
+            EquipmentPart.MAIN -> copy(main = item)
+            EquipmentPart.VANITY -> copy(vanity = item)
+            EquipmentPart.DYE -> copy(dye = item)
+        }
+
+        return when (type) {
+            EquipmentType.ARMOR -> copy(armor = armor.updateAt(index) { it.updatePart(part, item) })
+            EquipmentType.ACCESSORIES ->
+                copy(accessories = accessories.updateAt(index) { it.updatePart(part, item) })
+
+            EquipmentType.MISC -> copy(
+                misc = misc.updateAt(index) { slot ->
+                    when (part) {
+                        EquipmentPart.MAIN -> slot.copy(main = item)
+                        EquipmentPart.DYE -> slot.copy(dye = item)
+                        EquipmentPart.VANITY -> error("Misc equipment does not have a vanity slot")
+                    }
+                }
             )
         }
     }
@@ -130,8 +217,7 @@ sealed interface PlayerEditorIntent {
     }
 
     sealed interface Storage : PlayerEditorIntent {
-        data class UpdateInventorySlot(val item: Item, val index: Int) : Storage
-        data class UpdateEquipmentSlot(val item: EquipmentSlot, val index: Int) : Storage
+        data class UpdateSlot(val item: Item, val location: SlotLocation) : Storage
     }
 
     sealed interface Research : PlayerEditorIntent {
@@ -142,3 +228,4 @@ sealed interface PlayerEditorIntent {
     data object ResetChanges : PlayerEditorIntent
     data object SavePlayer : PlayerEditorIntent
 }
+

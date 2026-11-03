@@ -57,7 +57,7 @@ fun PlayerLoadScreen(loadPlayer: LoadPlayerUseCase, onLoadComplete: (Player) -> 
             PlayerLoadState.Loading -> Text("Чтение и обработка файла…")
             is PlayerLoadState.Error -> Text("Ошибка: ${curState.message}")
         }
-        Text("Формат полностью поддерживается, начиная с версии Terraria 1.4.0.1 (Journey's End).\n Все, что было раньше - поддерживается частично и может выдавать ошибики")
+        Text("Формат полностью поддерживается, начиная с версии Terraria 1.4.0.1 (Journey's End).\n Все, что было раньше - поддерживается частично и может выдавать ошибки")
     }
 }
 

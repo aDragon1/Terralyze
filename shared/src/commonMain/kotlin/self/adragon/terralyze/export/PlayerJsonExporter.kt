@@ -45,7 +45,7 @@ class PlayerJsonExporter(private val json: Json = Json { prettyPrint = true }) :
         putValue("unlockedBiomeTorches", parsedPlayer.biomeTorches)
         putValue("usingBiomeTorches", parsedPlayer.usingBiomeTorches)
         putValue("ateArtisanLoaf", parsedPlayer.artisanLoaf)
-        putValue("vitalCrystal", parsedPlayer.aegisCrystall)
+        putValue("vitalCrystal", parsedPlayer.aegisCrystal)
         putValue("aegisFruit", parsedPlayer.aegisFruit)
         putValue("arcaneCrystal", parsedPlayer.arcaneCrystal)
         putValue("galaxyPearl", parsedPlayer.galaxyPearl)

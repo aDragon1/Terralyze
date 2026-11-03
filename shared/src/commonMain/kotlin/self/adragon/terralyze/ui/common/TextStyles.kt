@@ -21,9 +21,7 @@ fun SecondaryText(
 
 @Composable
 fun ValueText(text: String, modifier: Modifier = Modifier) =
-    Text(
-        text, modifier, style = MaterialTheme.typography.labelLarge
-    )
+    Text(text, modifier, style = MaterialTheme.typography.labelLarge)
 
 @Composable
 fun CaptionText(text: String, modifier: Modifier = Modifier) =

@@ -24,6 +24,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import self.adragon.terralyze.ui.hub.ItemImageCache
+import self.adragon.terralyze.ui.hub.editor.SlotLocation
 import self.adragon.terralyze.ui.hub.storage.ItemState
 import self.adragon.terralyze.ui.hub.storage.ResolvedItem
 
@@ -38,33 +39,50 @@ fun ItemImage(name: String, url: String, modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun SlotGrid(itemRows: List<List<ResolvedItem>>, slotGap: Dp, slotSize: Dp) =
-    Column(verticalArrangement = Arrangement.spacedBy(slotGap)) {
-        itemRows.forEach { row ->
-            Row(horizontalArrangement = Arrangement.spacedBy(slotGap)) {
-                row.forEach { ItemOverview(it, slotGap, slotSize) }
+fun SlotGrid(
+    itemRows: List<List<ResolvedItem>>, locationRows: List<List<SlotLocation>>,
+    slotGap: Dp, slotSize: Dp, selectedLocation: SlotLocation?, onClick: (SlotLocation) -> Unit
+) = Column(verticalArrangement = Arrangement.spacedBy(slotGap)) {
+    itemRows.forEachIndexed { i, row ->
+        Row(horizontalArrangement = Arrangement.spacedBy(slotGap)) {
+            row.forEachIndexed { j, item ->
+                val location = locationRows[i][j]
+                ItemOverview(item, slotGap, slotSize, location == selectedLocation)
+                { onClick(location) }
             }
         }
     }
+}
 
 @Composable
-fun ItemSlotFrame(slotGap: Dp, slotSize: Dp, content: @Composable BoxScope.() -> Unit) = Box(
-    Modifier.size(slotSize)
+fun ItemSlotFrame(
+    slotGap: Dp,
+    slotSize: Dp,
+    modifier: Modifier = Modifier,
+    content: @Composable BoxScope.() -> Unit
+) = Box(
+    modifier.size(slotSize)
         .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(6.dp))
         .padding(slotGap),
-    contentAlignment = Alignment.Center,
+    Alignment.Center,
     content = content
 )
 
 @Composable
-fun ItemOverview(item: ResolvedItem, slotGap: Dp, slotSize: Dp) =
+fun ItemOverview(
+    item: ResolvedItem, slotGap: Dp, slotSize: Dp, isSelected: Boolean = false,
+    onClick: () -> Unit = {},
+) = EditableContainer(onClick, isEditing = isSelected) {
     ItemSlotFrame(slotGap, slotSize) {
         when (item.state) {
             ItemState.EMPTY -> Unit
-            ItemState.UNKNOWN -> UnknownItem(item.item.id, Modifier.align(Alignment.BottomEnd))
+            ItemState.UNKNOWN ->
+                UnknownItem(item.item.id, Modifier.align(Alignment.BottomEnd))
+
             ItemState.KNOWN -> FilledItem(item)
         }
     }
+}
 
 @Composable
 fun UnknownItem(id: Int?, modifier: Modifier = Modifier) =

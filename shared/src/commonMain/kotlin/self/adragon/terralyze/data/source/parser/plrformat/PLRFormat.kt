@@ -24,7 +24,7 @@ object PLRFormat {
         isUsingBiomeTorchesAvailable = version >= 229,
         isAteArtisanBreadAvailable = version >= 256,
         shouldSkipBeforeShimmer = version >= 324,
-        isShimmerAvaliable = version >= 260,
+        isShimmerAvailable = version >= 260,
         isDownedDD2EventAnyDifficultyAvailable = version >= 182,
         isTaxMoneyAvailable = version >= 128,
         isNumberOfDeathsAvailable = version >= 254,

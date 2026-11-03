@@ -23,7 +23,7 @@ import self.adragon.terralyze.data.source.parser.plrformat.PLRFormatSpec
 
 /*
 * Take and readapt source code of the https://terraria-research-tracker.free.nf
-* Thank's, I suppose?
+* Thanks, I suppose?
 */
 class PlayerParser {
     fun parse(content: ByteArray): ParsedPlayer {
@@ -65,12 +65,12 @@ class PlayerParser {
             readIfAvailable(spec.isAteArtisanBreadAvailable) { reader.readBoolean() }
         if (spec.shouldSkipBeforeShimmer) reader.skip(1)
 
-        val vitalCrystal = readIfAvailable(spec.isShimmerAvaliable) { reader.readBoolean() }
-        val aegisFruit = readIfAvailable(spec.isShimmerAvaliable) { reader.readBoolean() }
-        val arcaneCrystal = readIfAvailable(spec.isShimmerAvaliable) { reader.readBoolean() }
-        val galaxyPearl = readIfAvailable(spec.isShimmerAvaliable) { reader.readBoolean() }
-        val gummyWorm = readIfAvailable(spec.isShimmerAvaliable) { reader.readBoolean() }
-        val ambrosia = readIfAvailable(spec.isShimmerAvaliable) { reader.readBoolean() }
+        val vitalCrystal = readIfAvailable(spec.isShimmerAvailable) { reader.readBoolean() }
+        val aegisFruit = readIfAvailable(spec.isShimmerAvailable) { reader.readBoolean() }
+        val arcaneCrystal = readIfAvailable(spec.isShimmerAvailable) { reader.readBoolean() }
+        val galaxyPearl = readIfAvailable(spec.isShimmerAvailable) { reader.readBoolean() }
+        val gummyWorm = readIfAvailable(spec.isShimmerAvailable) { reader.readBoolean() }
+        val ambrosia = readIfAvailable(spec.isShimmerAvailable) { reader.readBoolean() }
 
         val downedDd2Event =
             readIfAvailable(spec.isDownedDD2EventAnyDifficultyAvailable) { reader.readBoolean() }
@@ -185,7 +185,7 @@ class PlayerParser {
             biomeTorches = unlockedBiomeTorches,
             usingBiomeTorches = usingBiomeTorches,
             artisanLoaf = ateArtisanBread,
-            aegisCrystall = vitalCrystal,
+            aegisCrystal = vitalCrystal,
             aegisFruit = aegisFruit,
             arcaneCrystal = arcaneCrystal,
             galaxyPearl = galaxyPearl,

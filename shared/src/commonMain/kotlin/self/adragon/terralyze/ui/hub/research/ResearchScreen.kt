@@ -1,6 +1,5 @@
 package self.adragon.terralyze.ui.hub.research
 
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -12,12 +11,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -33,8 +27,10 @@ import self.adragon.terralyze.domain.model.ItemTag
 import self.adragon.terralyze.domain.model.Player
 import self.adragon.terralyze.ui.common.AppCard
 import self.adragon.terralyze.ui.common.CaptionText
+import self.adragon.terralyze.ui.common.FilterChipRow
 import self.adragon.terralyze.ui.common.GroupedDropDown
 import self.adragon.terralyze.ui.common.ItemImage
+import self.adragon.terralyze.ui.common.SearchTextField
 import self.adragon.terralyze.ui.common.SecondaryText
 import self.adragon.terralyze.ui.common.StatBar
 
@@ -176,23 +172,3 @@ private fun UnknownResearchItemCard(
         SecondaryText("Amount: ${item.amount}")
     }
 }
-
-@Composable
-fun SearchTextField(
-    value: String, onValueChange: (String) -> Unit,
-    modifier: Modifier = Modifier,
-    placeholder: String = "Search...",
-) = OutlinedTextField(
-    value, onValueChange, modifier, placeholder = { Text(placeholder) },
-    leadingIcon = { Text("⌕") }, trailingIcon = {
-        if (value.isNotEmpty()) IconButton(onClick = { onValueChange("") }) { Text("×") }
-    }, singleLine = true
-)
-
-@Composable
-fun <T> FilterChipRow(
-    selected: T, items: List<T>, onSelect: (T) -> Unit, itemLabel: (T) -> String,
-    modifier: Modifier = Modifier,
-) = Row(
-    modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), Arrangement.spacedBy(8.dp),
-) { items.forEach { FilterChip(it == selected, { onSelect(it) }, { Text(itemLabel(it)) }) } }

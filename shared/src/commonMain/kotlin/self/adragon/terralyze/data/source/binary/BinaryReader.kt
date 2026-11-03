@@ -64,16 +64,6 @@ class BinaryReader(
         return data.copyOfRange(start, cursor).decodeToString()
     }
 
-    @OptIn(ExperimentalStdlibApi::class)
-    fun dumpFromHere(shift: Int) {
-        val dump = data.slice(cursor..<cursor + shift).toByteArray()
-        print("Bytes:")
-        dump.forEach { print("$it ") }
-        print("\nHex: ")
-        dump.map { it.toHexString(HexFormat.UpperCase) }.forEach { print("$it ") }
-        println("\n Cursor = $cursor")
-    }
-
     fun readVlq(): Int {
         var result = 0
         var shift = 0

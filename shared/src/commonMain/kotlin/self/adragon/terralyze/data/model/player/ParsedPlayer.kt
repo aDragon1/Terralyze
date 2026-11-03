@@ -27,7 +27,7 @@ data class ParsedPlayer(
     val biomeTorches: ParsedFieldValue<Boolean>,
     val usingBiomeTorches: ParsedFieldValue<Boolean>,
     val artisanLoaf: ParsedFieldValue<Boolean>,
-    val aegisCrystall: ParsedFieldValue<Boolean>,
+    val aegisCrystal: ParsedFieldValue<Boolean>,
     val aegisFruit: ParsedFieldValue<Boolean>,
     val arcaneCrystal: ParsedFieldValue<Boolean>,
     val galaxyPearl: ParsedFieldValue<Boolean>,

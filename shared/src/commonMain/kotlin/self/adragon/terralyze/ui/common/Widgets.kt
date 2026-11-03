@@ -1,11 +1,11 @@
 package self.adragon.terralyze.ui.common
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
@@ -17,15 +17,22 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Card
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -59,6 +66,8 @@ import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Popup
+import androidx.compose.ui.window.PopupProperties
 import kotlin.math.round
 
 @Composable
@@ -94,13 +103,35 @@ fun EditableContainer(
 @Composable
 fun <T> InlineValueEditor(
     value: T, modifier: Modifier = Modifier, content: @Composable (T) -> Unit, onSave: (T) -> Unit,
-    editor: @Composable (value: T, onDone: (T) -> Unit, onCancel: () -> Unit) -> Unit
-) = Column(modifier) {
+    editor: @Composable (value: T, onDone: (T) -> Unit, onCancel: () -> Unit) -> Unit,
+) = Box(modifier) {
     var isEditing by remember { mutableStateOf(false) }
+
     EditableContainer(isEditing = isEditing, onClick = { isEditing = true }) { content(value) }
-    AnimatedVisibility(isEditing) {
-        editor(value, { onSave(it); isEditing = false }, { isEditing = false })
-    }
+
+    if (isEditing)
+        Popup(
+            onDismissRequest = { isEditing = false },
+            properties = PopupProperties(
+                focusable = true,
+                dismissOnBackPress = true,
+                dismissOnClickOutside = true
+            )
+        ) {
+            Surface(
+                Modifier.padding(top = 4.dp).widthIn(min = 200.dp, max = 320.dp),
+                RoundedCornerShape(12.dp), MaterialTheme.colorScheme.surfaceContainerHigh,
+                tonalElevation = 6.dp, shadowElevation = 8.dp,
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+            ) {
+                Box(Modifier.padding(12.dp)) {
+                    editor(
+                        value, { onSave(it); isEditing = false },
+                        { isEditing = false }
+                    )
+                }
+            }
+        }
 }
 
 @Composable
@@ -188,17 +219,51 @@ fun InlineIntEditor(
 
 @Composable
 fun <T> InlineDropdown(
-    value: T, items: List<T>, content: @Composable (T) -> Unit,
-    itemLabel: (T) -> String, onSave: (T) -> Unit, modifier: Modifier = Modifier,
+    value: T, items: List<T>, content: @Composable (T) -> Unit, itemLabel: (T) -> String,
+    onSave: (T) -> Unit, modifier: Modifier = Modifier
 ) = Box(modifier) {
     var expanded by remember { mutableStateOf(false) }
-    EditableContainer(isEditing = expanded, onClick = { expanded = true }) { content(value) }
-    DropdownMenu(expanded, { expanded = false }) {
-        items.forEach {
-            DropdownMenuItem({ Text(itemLabel(it)) }, { onSave(it); expanded = false })
-        }
+    var searchQuery by remember { mutableStateOf("") }
+
+    EditableContainer(isEditing = expanded, onClick = { expanded = true }) {
+        content(value)
     }
+    val filteredItems = remember(items, searchQuery) {
+        if (searchQuery.isNotBlank()) items.filter { itemLabel(it).contains(searchQuery, true) }
+        else items
+    }
+
+    if (expanded)
+        Popup(
+            onDismissRequest = { expanded = false; searchQuery = "" },
+            properties = PopupProperties(
+                focusable = true,
+                dismissOnClickOutside = true,
+                dismissOnBackPress = true
+            )
+        ) {
+            LazyColumn(
+                Modifier.widthIn(190.dp, 280.dp).heightIn(max = 300.dp).background(
+                    MaterialTheme.colorScheme.surface,
+                    RoundedCornerShape(8.dp)
+                )
+            ) {
+                item {
+                    SearchTextField(
+                        searchQuery, { searchQuery = it },
+                        Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp),
+                    )
+                }
+                items(filteredItems) {
+                    DropdownMenuItem(
+                        { Text(itemLabel(it)) },
+                        { onSave(it); expanded = false; searchQuery = "" }
+                    )
+                }
+            }
+        }
 }
+
 
 @Composable
 fun InlineCurrentMaxEditor(
@@ -335,6 +400,26 @@ fun HoverTooltip(hint: String, content: @Composable () -> Unit) {
         tooltipState,
     ) { content() }
 }
+
+@Composable
+fun SearchTextField(
+    value: String, onValueChange: (String) -> Unit,
+    modifier: Modifier = Modifier,
+    placeholder: String = "Search...",
+) = OutlinedTextField(
+    value, onValueChange, modifier, placeholder = { Text(placeholder) },
+    leadingIcon = { Text("⌕") }, trailingIcon = {
+        if (value.isNotEmpty()) IconButton(onClick = { onValueChange("") }) { Text("×") }
+    }, singleLine = true
+)
+
+@Composable
+fun <T> FilterChipRow(
+    selected: T, items: List<T>, onSelect: (T) -> Unit, itemLabel: (T) -> String,
+    modifier: Modifier = Modifier,
+) = Row(
+    modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), Arrangement.spacedBy(8.dp),
+) { items.forEach { FilterChip(it == selected, { onSelect(it) }, { Text(itemLabel(it)) }) } }
 
 @Composable
 fun LabeledValue(name: String, value: String) = Surface(

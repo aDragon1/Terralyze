@@ -42,6 +42,8 @@ import self.adragon.terralyze.ui.common.LabeledValue
 import self.adragon.terralyze.ui.common.SecondaryText
 import self.adragon.terralyze.ui.common.SectionTitle
 import self.adragon.terralyze.ui.common.ValueText
+import self.adragon.terralyze.ui.hub.editor.PlayerEditorIntent
+import self.adragon.terralyze.ui.hub.editor.PlayerEditorStateHolder
 import kotlin.time.Duration
 
 @Composable
